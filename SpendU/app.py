@@ -145,6 +145,18 @@ def delete_bill(id):
     conn.close()
     return redirect(url_for('analytics'))
 
+@app.cli.command("init-db")
+def init_db():
+    """Initialize the database using schema.sql"""
+    db_path = os.path.join(app.instance_path, "spending.db")
+    conn = sqlite3.connect(db_path)
+    
+    with app.open_resource("schema.sql") as f:
+        conn.executescript(f.read().decode("utf8"))
+        
+    conn.commit()
+    conn.close()
+    print("Database initialized.")
 
 if __name__ == '__main__':
     app.run(debug=True)
