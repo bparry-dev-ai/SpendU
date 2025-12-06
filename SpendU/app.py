@@ -1,12 +1,14 @@
+import os
 from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
 from datetime import datetime, timedelta
 
-app = Flask(__name__)
+app = Flask(__name__, instance_relative_config=True)
 
 def get_db_connection():
     """Helper function to connect to the database easily."""
-    conn = sqlite3.connect('spending.db')
+    db_path = os.path.join(app.instance_path, 'spending.db')
+    conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     return conn
 
