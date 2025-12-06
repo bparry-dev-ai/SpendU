@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+    /* ===== Futuristic AI Gradient Background ===== */
+    body {
+        background: linear-gradient(135deg,
+            #0A033C 0%,
+            #0F1B33 30%,
+            #7B2FF7 70%,
+            #2AF7FF 100%);
+        background-attachment: fixed;
+        color: white;
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* ===== Modern Card Styling ===== */
+    .ai-card {
+        background: rgba(15, 27, 51, 0.55);
+        border: 1px solid rgba(122, 255, 255, 0.15);
+        box-shadow: 0 0 25px rgba(42, 247, 255, 0.2);
+        border-radius: 20px;
+        backdrop-filter: blur(8px);
+    }
+
+    /* ===== SpendU Logo Container ===== */
+    .logo-container {
+        margin-top: 40px;
+        margin-bottom: 20px;
+    }
+
+    .logo-icon {
+        width: 90px;
+        height: 90px;
+        background: radial-gradient(circle at 30% 30%, #2AF7FF, #7B2FF7);
+        border-radius: 22px;
+        box-shadow: 0px 0px 25px rgba(42, 247, 255, 0.4);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 42px;
+        font-weight: 700;
+        color: white;
+        letter-spacing: -2px;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .logo-text {
+        font-size: 40px;
+        font-weight: 800;
+        margin-top: 10px;
+        background: linear-gradient(90deg, #2AF7FF, #7B2FF7);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    /* ===== Buttons ===== */
+    .btn-primary {
+        background: linear-gradient(90deg, #7B2FF7, #2AF7FF);
+        border: none;
+        font-weight: 600;
+        border-radius: 14px;
+    }
+
+    .btn-outline-dark {
+        border: 2px solid #2AF7FF;
+        color: #2AF7FF !important;
+        font-weight: 600;
+        border-radius: 14px;
+    }
+
+    .btn-outline-dark:hover {
+        background: #2AF7FF;
+        color: #0A033C !important;
+    }
+
+    /* ===== Headings ===== */
+    h1, h3, h4, h5 {
+        text-shadow: 0 0 8px rgba(42, 247, 255, 0.2);
+    }
+
+    /* Subtle neural network / circuit background (very soft) */
+    .circuit-bg {
+        background-image: url("https://i.imgur.com/bN5Qm1A.png"); /* optional — replace with your own */
+        background-size: cover;
+        background-repeat: no-repeat;
+        opacity: 0.04;
+        pointer-events: none;
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+    }
+</style>
+
+
+<div class="circuit-bg"></div>
+
+<!-- ===== SpendU Logo + Branding ===== -->
+<div class="text-center logo-container">
+    <div class="logo-icon">S</div>
+    <div class="logo-text">SpendU</div>
+</div>
+
+<!-- ===== Date + Time ===== -->
+<div class="text-center mb-5">
+    <h3>{{ date }}</h3>
+    <h4>{{ time }}</h4>
+</div>
+
+<!-- ===== Spending Summary ===== -->
+<div class="card p-4 mb-4 text-center ai-card">
+    <h5 class="card-title">Spending (Last 7 Days)</h5>
+    <h1 class="display-4" style="color: #FF6B6B;">${{ spent }}</h1>
+</div>
+
+<!-- ===== Buttons ===== -->
+<div class="d-grid gap-2">
+    <a href="{{ url_for('add_transaction') }}" class="btn btn-primary btn-lg">➕ Add Transaction</a>
+    <a href="{{ url_for('analytics') }}" class="btn btn-outline-dark btn-lg">📊 View Analytics</a>
+</div>
+
+{% endblock %}

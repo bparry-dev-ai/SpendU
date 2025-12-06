@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+    /* ===== Glassmorphic Card Wrapper ===== */
+    .ai-card {
+        background: rgba(15, 27, 51, 0.55);
+        border: 1px solid rgba(122, 255, 255, 0.15);
+        box-shadow: 0 0 28px rgba(42, 247, 255, 0.25);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 30px;
+    }
+
+    h2 {
+        text-shadow: 0 0 12px rgba(42, 247, 255, 0.35);
+        color: #E6EAF5;
+    }
+
+    /* ===== Input + Select Fields ===== */
+    .form-control, .form-select {
+        background: rgba(10, 3, 60, 0.35);
+        border: 1px solid rgba(42, 247, 255, 0.18);
+        color: #E6EAF5;
+        border-radius: 14px;
+        box-shadow: 0 0 14px rgba(42, 247, 255, 0.08);
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #2AF7FF;
+        box-shadow: 0 0 18px rgba(42, 247, 255, 0.35);
+        background: rgba(10, 3, 60, 0.45);
+        color: white;
+    }
+
+    label {
+        font-weight: 600;
+        color: #C9D2FF;
+        text-shadow: 0 0 6px rgba(42, 247, 255, 0.25);
+    }
+
+    /* ===== Toggle Buttons (Spending / Bill) ===== */
+    .btn-outline-primary {
+        border-color: #2AF7FF;
+        color: #2AF7FF;
+        border-radius: 14px;
+        font-weight: 600;
+        transition: 0.2s;
+    }
+
+    .btn-outline-primary:hover,
+    .btn-check:checked + .btn-outline-primary {
+        background: linear-gradient(90deg, #7B2FF7, #2AF7FF);
+        color: white;
+        box-shadow: 0 0 18px rgba(42, 247, 255, 0.35);
+        border-color: transparent;
+    }
+
+    /* ===== Save Button ===== */
+    .btn-success {
+        background: linear-gradient(90deg, #7B2FF7, #2AF7FF);
+        border: none;
+        border-radius: 14px;
+        font-weight: 700;
+        color: white;
+        box-shadow: 0 0 20px rgba(42, 247, 255, 0.35);
+    }
+
+    .btn-success:hover {
+        background: linear-gradient(90deg, #2AF7FF, #7B2FF7);
+    }
+
+    /* ===== Cancel Link ===== */
+    .btn-link {
+        color: #A0BDFF !important;
+        font-weight: 600;
+        text-shadow: 0 0 6px rgba(42, 247, 255, 0.2);
+    }
+</style>
+
+<div class="ai-card">
+
+    <h2 class="mb-4 text-center">Add Transaction</h2>
+
+    <form method="post">
+
+        <!-- Toggle Spending / Bill -->
+        <div class="btn-group w-100 mb-3" role="group">
+            <input type="radio" class="btn-check" name="type" id="type_spending" value="spending" checked onclick="toggleType()">
+            <label class="btn btn-outline-primary" for="type_spending">Spending</label>
+
+            <input type="radio" class="btn-check" name="type" id="type_bill" value="bill" onclick="toggleType()">
+            <label class="btn btn-outline-primary" for="type_bill">Bill</label>
+        </div>
+
+        <!-- Amount -->
+        <div class="mb-3">
+            <label class="form-label">Amount</label>
+            <input type="number" step="0.01" name="amount" class="form-control" placeholder="0.00" required>
+        </div>
+
+        <!-- Date -->
+        <div class="mb-3">
+            <label class="form-label">Date</label>
+            <input type="date" name="date" class="form-control" value="{{ request.args.get('date', '') }}" id="dateField" required>
+        </div>
+
+        <!-- Card Dropdown -->
+        <div class="mb-3">
+            <label class="form-label">Card Used</label>
+            <select name="card_id" class="form-select">
+                {% for card in cards %}
+                    <option value="{{ card['card_id'] }}">{{ card['name'] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Category (for Spending only) -->
+        <div class="mb-3" id="category_div">
+            <label class="form-label">Category</label>
+            <select name="category_id" class="form-select">
+                {% for cat in categories %}
+                    <option value="{{ cat['category_id'] }}">{{ cat['name'] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Bills (Only visible for Bill type) -->
+        <div class="mb-3" id="bill_div" style="display:none;">
+            <label class="form-label">Bill Name</label>
+            <select name="bill_id" class="form-select">
+                {% for bill in bills %}
+                    <option value="{{ bill['bill_id'] }}">{{ bill['name'] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-success w-100 mt-3">Save Transaction</button>
+        <a href="{{ url_for('index') }}" class="btn btn-link w-100 mt-2">Cancel</a>
+    </form>
+</div>
+
+<!-- JavaScript -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    toggleType(); // ensure correct visibility on load
+});
+
+function toggleType() {
+    const isSpending = document.getElementById("type_spending").checked;
+
+    document.getElementById("category_div").style.display = isSpending ? "block" : "none";
+    document.getElementById("bill_div").style.display     = isSpending ? "none"  : "block";
+}
+</script>
+
+
+{% endblock %}

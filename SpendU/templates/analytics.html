@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+    .section-title {
+        text-shadow: 0 0 12px rgba(42, 247, 255, 0.4);
+        color: #C9D2FF;
+        margin-bottom: 18px;
+        text-align: center;
+    }
+
+    .ai-table-container {
+        background: rgba(15, 27, 51, 0.60);
+        border-radius: 20px;
+        border: 1px solid rgba(122, 255, 255, 0.15);
+        box-shadow: 0 0 28px rgba(42, 247, 255, 0.30);
+        backdrop-filter: blur(10px);
+        padding: 25px;
+        margin-bottom: 45px;
+    }
+
+    .table thead th {
+        color: #2AF7FF;
+        border-bottom: 2px solid rgba(42, 247, 255, 0.25);
+        background: rgba(10, 3, 60, 0.4);
+        text-shadow: 0 0 10px rgba(42, 247, 255, 0.25);
+    }
+
+    .table tbody tr {
+        background: rgba(10, 3, 60, 0.25);
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .table tbody tr:hover {
+        background: rgba(42, 247, 255, 0.12);
+        transition: 0.25s;
+    }
+
+    .table td {
+        color: #1A1F33;
+        vertical-align: middle;
+    }
+
+    .delete-btn {
+        background: rgba(255, 80, 80, 0.75);
+        border: none;
+        padding: 6px 10px;
+        border-radius: 10px;
+        font-size: 14px;
+        color: white;
+        font-weight: 600;
+        box-shadow: 0 0 12px rgba(255, 80, 80, 0.45);
+    }
+    .delete-btn:hover {
+        background: rgba(255, 80, 80, 1);
+        transform: scale(1.05);
+    }
+
+    .btn-primary {
+        background: linear-gradient(90deg, #7B2FF7, #2AF7FF);
+        border-radius: 14px;
+        border: none;
+        font-weight: 600;
+        box-shadow: 0 0 15px rgba(42, 247, 255, 0.25);
+    }
+</style>
+
+<!-- PAGE TITLE -->
+<h2 class="text-center mb-5" style="text-shadow: 0 0 14px rgba(42, 247, 255, 0.45);">
+    SpendU Dashboard
+</h2>
+
+<!-- RECENT SPENDING TABLE -->
+<div class="ai-table-container">
+    <h3 class="section-title">Recent Spending</h3>
+    <table class="table table-borderless align-middle">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Card</th>
+                <th>Amount</th>
+                <th style="width: 90px;">Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in spending %}
+            <tr>
+                <td>{{ row['date'] }}</td>
+                <td>{{ row['category'] }}</td>
+                <td>{{ row['card'] }}</td>
+                <td style="color:#FF6B6B;">${{ row['amount'] }}</td>
+                <td>
+                    <form method="POST"
+                          action="{{ url_for('delete_transaction', id=row['id']) }}"
+                          onsubmit="return confirm('Delete this spending transaction?');">
+                        <button class="delete-btn">🗑</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" class="text-center text-muted">No spending found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- RECENT BILLS TABLE -->
+<div class="ai-table-container">
+    <h3 class="section-title">Recent Bills</h3>
+    <table class="table table-borderless align-middle">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Bill</th>
+                <th>Card</th>
+                <th>Amount</th>
+                <th style="width: 90px;">Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in bills %}
+            <tr>
+                <td>{{ row['date'] }}</td>
+                <td>{{ row['bill_name'] }}</td>
+                <td>{{ row['card'] }}</td>
+                <td style="color:#FF6B6B;">${{ row['amount'] }}</td>
+                <td>
+                    <form method="POST"
+                          action="{{ url_for('delete_bill', id=row['id']) }}"
+                          onsubmit="return confirm('Delete this bill transaction?');">
+                        <button class="delete-btn">🗑</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" class="text-center text-muted">No bills found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="text-center">
+    <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">⬅ Back to Home</a>
+</div>
+
+{% endblock %}
+
