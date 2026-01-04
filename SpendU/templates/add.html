@@ -24,7 +24,7 @@
         border: 1px solid rgba(42, 247, 255, 0.18);
         color: #E6EAF5;
         border-radius: 14px;
-        box-shadow: 0 0 14px rgba(42, 247, 255, 0.08);
+        box-shadow: 0 0 14px rgba(66, 66, 66, 0.267);
     }
 
     .form-control:focus, .form-select:focus {
@@ -73,7 +73,7 @@
 
     /* ===== Cancel Link ===== */
     .btn-link {
-        color: #A0BDFF !important;
+        color: #B35C5C !important;
         font-weight: 600;
         text-shadow: 0 0 6px rgba(42, 247, 255, 0.2);
     }
@@ -88,16 +88,16 @@
         <!-- Toggle Spending / Bill -->
         <div class="btn-group w-100 mb-3" role="group">
             <input type="radio" class="btn-check" name="type" id="type_spending" value="spending" checked onclick="toggleType()">
-            <label class="btn btn-outline-primary" for="type_spending">Spending</label>
+            <label class="btn btn-outline-primary" for="type_spending">SPENDING</label>
 
             <input type="radio" class="btn-check" name="type" id="type_bill" value="bill" onclick="toggleType()">
-            <label class="btn btn-outline-primary" for="type_bill">Bill</label>
+            <label class="btn btn-outline-primary" for="type_bill">BILL</label>
         </div>
 
         <!-- Amount -->
         <div class="mb-3">
             <label class="form-label">Amount</label>
-            <input type="number" step="0.01" name="amount" class="form-control" placeholder="0.00" required>
+            <input type="number" step="0.01" name="amount" class="form-control" placeholder="$0.00" required>
         </div>
 
         <!-- Date -->

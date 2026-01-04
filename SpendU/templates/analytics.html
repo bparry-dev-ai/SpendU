@@ -3,11 +3,25 @@
 {% block content %}
 
 <style>
-    .section-title {
+    .section-spendtitle {
         text-shadow: 0 0 12px rgba(42, 247, 255, 0.4);
         color: #C9D2FF;
         margin-bottom: 18px;
         text-align: center;
+    }
+
+    .section-title, .section-total {
+        text-shadow: 0 0 12px rgba(42, 247, 255, 0.4);
+        color: #C9D2FF;
+        margin-bottom: 18px;
+    }
+
+    .section-title {
+        text-align: left;
+    }
+
+    .section-total {
+        text-align: right;
     }
 
     .ai-table-container {
@@ -67,20 +81,20 @@
 
 <!-- PAGE TITLE -->
 <h2 class="text-center mb-5" style="text-shadow: 0 0 14px rgba(42, 247, 255, 0.45);">
-    SpendU Dashboard
+    SpendU Analytics
 </h2>
 
 <!-- RECENT SPENDING TABLE -->
 <div class="ai-table-container">
-    <h3 class="section-title">Recent Spending</h3>
+    <h3 class="section-spendtitle">RECENT SPENDING</h3>
     <table class="table table-borderless align-middle">
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Category</th>
-                <th>Card</th>
-                <th>Amount</th>
-                <th style="width: 90px;">Delete</th>
+                <th>DATE</th>
+                <th>CATEGORY</th>
+                <th>CARD</th>
+                <th>AMOUNT</th>
+                <th style="width: 90px;">DELETE</th>
             </tr>
         </thead>
         <tbody>
@@ -89,7 +103,7 @@
                 <td>{{ row['date'] }}</td>
                 <td>{{ row['category'] }}</td>
                 <td>{{ row['card'] }}</td>
-                <td style="color:#FF6B6B;">${{ row['amount'] }}</td>
+                <td style="color:#FF6B6B;">${{ "%.2f"|format(row['amount']) }}</td>
                 <td>
                     <form method="POST"
                           action="{{ url_for('delete_transaction', id=row['id']) }}"
@@ -107,15 +121,19 @@
 
 <!-- RECENT BILLS TABLE -->
 <div class="ai-table-container">
-    <h3 class="section-title">Recent Bills</h3>
+    <div class= "section-header d-flex justify-content-between align-items-center mb-2">
+        <h3 class="section-title mb-0">RECENT BILLS</h3>
+        <span class="section-total mb-0">Apple Card Total: ${{ "%.2f" | format(total) }}
+        </span>
+    </div>
     <table class="table table-borderless align-middle">
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Bill</th>
-                <th>Card</th>
-                <th>Amount</th>
-                <th style="width: 90px;">Delete</th>
+                <th>DATE</th>
+                <th>BILL</th>
+                <th>CARD</th>
+                <th>AMOUNT</th>
+                <th style="width: 90px;">DELETE</th>
             </tr>
         </thead>
         <tbody>
@@ -124,7 +142,7 @@
                 <td>{{ row['date'] }}</td>
                 <td>{{ row['bill_name'] }}</td>
                 <td>{{ row['card'] }}</td>
-                <td style="color:#FF6B6B;">${{ row['amount'] }}</td>
+                <td style="color:#FF6B6B;">${{ "%.2f"|format(row['amount']) }}</td>
                 <td>
                     <form method="POST"
                           action="{{ url_for('delete_bill', id=row['id']) }}"

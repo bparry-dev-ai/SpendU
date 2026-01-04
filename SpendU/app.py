@@ -21,19 +21,26 @@ def index():
     current_date = now.strftime("%Y-%m-%d")
     current_time = now.strftime("%I:%M %p")
     
-    seven_days_ago = (now - timedelta(days=7)).strftime("%Y-%m-%d")
+    monday = now - timedelta(days=now.weekday())
+    sunday = monday + timedelta(days= 6)
+    
+    monday_str = monday.strftime("%Y-%m-%d")
+    sunday_str = sunday.strftime("%Y-%m-%d")
+    
+    monday_str_display = monday.strftime("%m/%d")
+    sunday_str_display = sunday.strftime("%m/%d")
 
     query = """
         SELECT COALESCE(SUM(amount), 0) as total 
         FROM spending 
-        WHERE date >= ?
+        WHERE date BETWEEN ? AND ?;
     """
-    result = conn.execute(query, (seven_days_ago,)).fetchone()
+    result = conn.execute(query, (monday_str, sunday_str)).fetchone()
     weekly_spent = (f"{result['total']:.2f}")
 
     conn.close()
 
-    return render_template('index.html', date=current_date, time=current_time, spent=weekly_spent)
+    return render_template('index.html', date=current_date, time=current_time, spent=weekly_spent, wkbegin=monday_str_display, wkend=sunday_str_display)
 
 @app.route('/add', methods=('GET', 'POST'))
 def add_transaction():
@@ -51,6 +58,7 @@ def add_transaction():
             return "Missing required fields", 400
         
         amount = float(amount)
+        famount = float(f"{amount:.2f}")
 
         if trans_type == 'spending':
             category_id = request.form.get('category_id')
@@ -60,7 +68,7 @@ def add_transaction():
 
             conn.execute(
                 'INSERT INTO spending (category_id, card_id, amount, date) VALUES (?, ?, ?, ?)',
-                (category_id, card_id, amount, date_val)
+                (category_id, card_id, famount, date_val)
             )
 
         elif trans_type == 'bill':
@@ -73,7 +81,7 @@ def add_transaction():
 
             conn.execute(
                 'INSERT INTO bills (bill_id, card_id, amount, date) VALUES (?, ?, ?, ?)',
-                (bill_id, card_id, amount, date_val)
+                (bill_id, card_id, famount, date_val)
             )
 
         conn.commit()
@@ -118,13 +126,32 @@ def analytics():
         LIMIT 8
     """
     recent_bills = conn.execute(bills_query).fetchall()
+    
+    # Apple card total
+    now = datetime.now()
+    
+    begin = now - timedelta(days= 6)
+    end = now + timedelta(days= 6)
+    
+    begin_str = begin.strftime("%Y-%m-%d")
+    end_str = end.strftime("%Y-%m-%d")
+    
+    apple_total_query = """
+        SELECT COALESCE(SUM(amount), 0)
+        FROM bills 
+        WHERE card_id=1
+        AND date BETWEEN ? AND ?
+    """
+    result = conn.execute(apple_total_query, (begin_str, end_str)).fetchone()
+    apple_total = result[0]
 
     conn.close()
 
     return render_template(
         'analytics.html',
         spending=recent_spending,
-        bills=recent_bills
+        bills=recent_bills,
+        total=apple_total
     )
 
 
