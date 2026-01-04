@@ -47,6 +47,7 @@
         border-radius: 14px;
         font-weight: 600;
         transition: 0.2s;
+        width: 300px;
     }
 
     .btn-outline-primary:hover,
@@ -65,6 +66,7 @@
         font-weight: 700;
         color: white;
         box-shadow: 0 0 20px rgba(42, 247, 255, 0.35);
+        width: 300px;
     }
 
     .btn-success:hover {
@@ -73,9 +75,13 @@
 
     /* ===== Cancel Link ===== */
     .btn-link {
+        background: linear-gradient(135deg, #2A1E1E, #3A2323);
+        border-radius: 14px;
+        border-color: #7A3F3F;
         color: #B35C5C !important;
-        font-weight: 600;
+        font-weight: 700;
         text-shadow: 0 0 6px rgba(42, 247, 255, 0.2);
+        width: 300px;
     }
 </style>
 
@@ -86,7 +92,7 @@
     <form method="post">
 
         <!-- Toggle Spending / Bill -->
-        <div class="btn-group w-100 mb-3" role="group">
+        <div class="d-flex justify-content-center gap-3">
             <input type="radio" class="btn-check" name="type" id="type_spending" value="spending" checked onclick="toggleType()">
             <label class="btn btn-outline-primary" for="type_spending">SPENDING</label>
 
@@ -136,8 +142,10 @@
             </select>
         </div>
 
-        <button type="submit" class="btn btn-success w-100 mt-3">Save Transaction</button>
-        <a href="{{ url_for('index') }}" class="btn btn-link w-100 mt-2">Cancel</a>
+        <div class="d-flex justify-content-center gap-3">
+            <button type="submit" class="btn btn-success mt-3">Save Transaction</button>
+            <a href="{{ url_for('index') }}" class="btn btn-link mt-3">Cancel</a>
+        </div>
     </form>
 </div>
 

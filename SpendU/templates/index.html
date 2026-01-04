@@ -63,6 +63,7 @@
         border: none;
         font-weight: 600;
         border-radius: 14px;
+        width: 300px;
     }
 
     .btn-outline-dark {
@@ -70,6 +71,8 @@
         color: #2AF7FF !important;
         font-weight: 600;
         border-radius: 14px;
+        width: 300px;
+
     }
 
     .btn-outline-dark:hover {
@@ -116,9 +119,9 @@
 </div>
 
 <!-- ===== Buttons ===== -->
-<div class="d-grid gap-2">
-    <a href="{{ url_for('add_transaction') }}" class="btn btn-primary btn-lg">➕ Add Transaction</a>
-    <a href="{{ url_for('analytics') }}" class="btn btn-outline-dark btn-lg">📊 View Analytics</a>
+<div class="d-flex justify-content-center gap-3">
+    <a href="{{ url_for('add_transaction') }}" class="btn btn-primary">➕ Add Transaction</a>
+    <a href="{{ url_for('analytics') }}" class="btn btn-outline-dark">📊 View Analytics</a>
 </div>
 
 {% endblock %}
