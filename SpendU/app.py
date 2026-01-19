@@ -100,34 +100,45 @@ def add_transaction():
 @app.route('/analytics')
 def analytics():
     conn = get_db_connection()
+    
+    card_id = request.args.get('card_id')
 
+    cards = conn.execute('SELECT * FROM card_info').fetchall()
+    
+    spending_where = []
+    spending_params = []
+    
+    if card_id:
+        spending_where.append("s.card_id = ?")
+        spending_params.append(card_id)
+        
+    spending_where_sql = (
+        "WHERE " + " AND ".join(spending_where)
+        if spending_where else ""
+        )
+    
     # Recent spending
-    spending_query = """
+    spending_query = f"""
         SELECT s.id, s.date, s.amount,
                c.name AS category,
                card.name AS card
         FROM spending s
         JOIN category_info c ON s.category_id = c.category_id
         JOIN card_info card ON s.card_id = card.card_id
+        {spending_where_sql}
         ORDER BY s.date DESC
-        LIMIT 10
+        LIMIT 20
     """
-    recent_spending = conn.execute(spending_query).fetchall()
-
-    # Recent bills
-    bills_query = """
-        SELECT b.id, b.date, b.amount,
-               bi.name AS bill_name,
-               card.name AS card
-        FROM bills b
-        JOIN bill_info bi ON b.bill_id = bi.bill_id
-        JOIN card_info card ON b.card_id = card.card_id
-        ORDER BY b.date DESC
-        LIMIT 8
-    """
-    recent_bills = conn.execute(bills_query).fetchall()
+    recent_spending = conn.execute(spending_query, spending_params).fetchall()
     
-    # Apple card total
+    # Spending Card total
+    s_where = []
+    s_params = []
+    
+    if card_id:
+        s_where.append("card_id = ?")
+        s_params.append(card_id)
+    
     now = datetime.now()
     
     begin = now - timedelta(days= 6)
@@ -136,14 +147,65 @@ def analytics():
     begin_str = begin.strftime("%Y-%m-%d")
     end_str = end.strftime("%Y-%m-%d")
     
-    apple_total_query = """
+    s_where.append("date BETWEEN ? AND ?")
+    s_params.extend([begin_str, end_str])
+    
+    where_sql = "WHERE " + " AND ".join(s_where)
+    
+    s_card_total_query = f"""
+        SELECT COALESCE(SUM(amount), 0)
+        FROM spending 
+        {where_sql}
+    """
+    result = conn.execute(s_card_total_query, s_params).fetchone()
+    s_card_total = result[0]
+
+    bill_where = []
+    bill_params = []
+    
+    if card_id:
+        bill_where.append("b.card_id = ?")
+        bill_params.append(card_id)
+        
+    bill_where_sql = (
+        "WHERE " + " AND ".join(bill_where)
+        if bill_where else ""
+        )
+    
+    # Recent bills
+    bills_query = f"""
+        SELECT b.id, b.date, b.amount,
+               bi.name AS bill_name,
+               card.name AS card
+        FROM bills b
+        JOIN bill_info bi ON b.bill_id = bi.bill_id
+        JOIN card_info card ON b.card_id = card.card_id
+        {bill_where_sql}
+        ORDER BY b.date DESC
+        LIMIT 10
+    """
+    recent_bills = conn.execute(bills_query, bill_params).fetchall()
+    
+    # Bill Card total
+    b_where = []
+    b_params = []
+    
+    if card_id:
+        b_where.append("card_id = ?")
+        b_params.append(card_id)
+    
+    b_where.append("date BETWEEN ? AND ?")
+    b_params.extend([begin_str, end_str])
+    
+    b_where_sql = "WHERE " + " AND ".join(b_where)
+    
+    b_card_total_query = f"""
         SELECT COALESCE(SUM(amount), 0)
         FROM bills 
-        WHERE card_id=1
-        AND date BETWEEN ? AND ?
+        {b_where_sql}
     """
-    result = conn.execute(apple_total_query, (begin_str, end_str)).fetchone()
-    apple_total = result[0]
+    result = conn.execute(b_card_total_query, b_params).fetchone()
+    b_card_total = result[0]
 
     conn.close()
 
@@ -151,7 +213,9 @@ def analytics():
         'analytics.html',
         spending=recent_spending,
         bills=recent_bills,
-        total=apple_total
+        btotal=b_card_total,
+        stotal=s_card_total,
+        cards=cards
     )
 
 

@@ -84,9 +84,46 @@
     SpendU Analytics
 </h2>
 
+<form method="GET" class="ai-table-container mb-4">
+    <h3 class="section-title">Filter by Card</h3>
+
+    <div class="row g-3 align-items-end">
+        <div class="col-md-6">
+            <label class="form-label">Card</label>
+            <select name="card_id" class="form-select">
+                <option value="">All cards</option>
+                {% for card in cards %}
+                    <option value="{{ card['card_id'] }}"
+                        {% if request.args.get('card_id') == (card['card_id'] | string) %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ card['name'] }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <button class="btn btn-primary w-100">Apply</button>
+        </div>
+
+        <div class="col-md-3">
+            <a href="{{ url_for('analytics') }}" class="btn btn-outline-dark w-100">
+                Clear
+            </a>
+        </div>
+    </div>
+</form>
+
+
 <!-- RECENT SPENDING TABLE -->
 <div class="ai-table-container">
-    <h3 class="section-spendtitle">RECENT SPENDING</h3>
+    <div class= "section-header d-flex justify-content-between align-items-center mb-2">
+        <h3 class="section-title mb-0">RECENT SPENDING</h3>
+        <span class="section-total mb-0">Card Total: ${{ "%.2f" | format(stotal) }}
+        </span>
+    </div>
     <table class="table table-borderless align-middle">
         <thead>
             <tr>
@@ -123,7 +160,7 @@
 <div class="ai-table-container">
     <div class= "section-header d-flex justify-content-between align-items-center mb-2">
         <h3 class="section-title mb-0">RECENT BILLS</h3>
-        <span class="section-total mb-0">Apple Card Total: ${{ "%.2f" | format(total) }}
+        <span class="section-total mb-0">Card Total: ${{ "%.2f" | format(btotal) }}
         </span>
     </div>
     <table class="table table-borderless align-middle">
