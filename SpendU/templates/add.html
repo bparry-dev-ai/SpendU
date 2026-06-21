@@ -3,32 +3,34 @@
 {% block content %}
 
 <style>
-    /* ===== Glassmorphic Card Wrapper ===== */
     .ai-card {
-        background: rgba(15, 27, 51, 0.55);
-        border: 1px solid rgba(122, 255, 255, 0.15);
-        box-shadow: 0 0 28px rgba(42, 247, 255, 0.25);
-        backdrop-filter: blur(10px);
-        border-radius: 20px;
         padding: 30px;
+        animation: cardIn 0.5s ease both;
+    }
+
+    @keyframes cardIn {
+        from { opacity: 0; transform: translateY(14px); }
+        to   { opacity: 1; transform: translateY(0); }
     }
 
     h2 {
         text-shadow: 0 0 12px rgba(42, 247, 255, 0.35);
-        color: #E6EAF5;
+        color: var(--text-bright);
+        font-family: 'Space Grotesk', sans-serif;
     }
 
     /* ===== Input + Select Fields ===== */
     .form-control, .form-select {
         background: rgba(10, 3, 60, 0.35);
         border: 1px solid rgba(42, 247, 255, 0.18);
-        color: #E6EAF5;
-        border-radius: 14px;
+        color: var(--text-bright);
+        border-radius: var(--radius-md);
         box-shadow: 0 0 14px rgba(66, 66, 66, 0.267);
+        transition: box-shadow 0.2s ease, background 0.2s ease;
     }
 
     .form-control:focus, .form-select:focus {
-        border-color: #2AF7FF;
+        border-color: var(--accent-cyan);
         box-shadow: 0 0 18px rgba(42, 247, 255, 0.35);
         background: rgba(10, 3, 60, 0.45);
         color: white;
@@ -36,52 +38,63 @@
 
     label {
         font-weight: 600;
-        color: #C9D2FF;
+        color: var(--text-soft);
         text-shadow: 0 0 6px rgba(42, 247, 255, 0.25);
     }
 
     /* ===== Toggle Buttons (Spending / Bill) ===== */
     .btn-outline-primary {
-        border-color: #2AF7FF;
-        color: #2AF7FF;
-        border-radius: 14px;
+        border-color: var(--accent-cyan);
+        color: var(--accent-cyan);
+        border-radius: var(--radius-md);
         font-weight: 600;
         transition: 0.2s;
-        width: 300px;
+        width: 260px;
     }
 
     .btn-outline-primary:hover,
     .btn-check:checked + .btn-outline-primary {
-        background: linear-gradient(90deg, #7B2FF7, #2AF7FF);
+        background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
         color: white;
         box-shadow: 0 0 18px rgba(42, 247, 255, 0.35);
         border-color: transparent;
     }
 
+    /* Smooth show/hide for the conditional fields */
+    #category_div, #bill_div {
+        transition: opacity 0.25s ease;
+    }
+
     /* ===== Save Button ===== */
     .btn-success {
-        background: linear-gradient(90deg, #7B2FF7, #2AF7FF);
+        background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
         border: none;
-        border-radius: 14px;
+        border-radius: var(--radius-md);
         font-weight: 700;
         color: white;
         box-shadow: 0 0 20px rgba(42, 247, 255, 0.35);
-        width: 300px;
+        width: 260px;
     }
 
     .btn-success:hover {
-        background: linear-gradient(90deg, #2AF7FF, #7B2FF7);
+        background: linear-gradient(90deg, var(--accent-cyan), var(--accent-violet));
     }
 
     /* ===== Cancel Link ===== */
     .btn-link {
         background: linear-gradient(135deg, #2A1E1E, #3A2323);
-        border-radius: 14px;
-        border-color: #7A3F3F;
-        color: #B35C5C !important;
+        border-radius: var(--radius-md);
+        border: 1px solid #7A3F3F;
+        color: #E8A6A6 !important;
         font-weight: 700;
-        text-shadow: 0 0 6px rgba(42, 247, 255, 0.2);
-        width: 300px;
+        width: 260px;
+    }
+    .btn-link:hover {
+        background: linear-gradient(135deg, #3A2323, #4A2828);
+    }
+
+    @media (max-width: 576px) {
+        .btn-outline-primary, .btn-success, .btn-link { width: 100%; }
     }
 </style>
 
@@ -92,7 +105,7 @@
     <form method="post">
 
         <!-- Toggle Spending / Bill -->
-        <div class="d-flex justify-content-center gap-3">
+        <div class="d-flex flex-wrap justify-content-center gap-3 mb-3">
             <input type="radio" class="btn-check" name="type" id="type_spending" value="spending" checked onclick="toggleType()">
             <label class="btn btn-outline-primary" for="type_spending">SPENDING</label>
 
@@ -142,7 +155,7 @@
             </select>
         </div>
 
-        <div class="d-flex justify-content-center gap-3">
+        <div class="d-flex flex-wrap justify-content-center gap-3">
             <button type="submit" class="btn btn-success mt-3">Save Transaction</button>
             <a href="{{ url_for('index') }}" class="btn btn-link mt-3">Cancel</a>
         </div>
@@ -162,6 +175,5 @@ function toggleType() {
     document.getElementById("bill_div").style.display     = isSpending ? "none"  : "block";
 }
 </script>
-
 
 {% endblock %}
