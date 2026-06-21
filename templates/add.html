@@ -93,6 +93,133 @@
         background: linear-gradient(135deg, #3A2323, #4A2828);
     }
 
+    /* ===== Error banner ===== */
+    .form-error {
+        background: rgba(255, 80, 80, 0.12);
+        border: 1px solid rgba(255, 80, 80, 0.4);
+        color: #FFB3B3;
+        border-radius: var(--radius-md);
+        padding: 12px 16px;
+        margin-bottom: 1.25rem;
+        font-weight: 500;
+        animation: fadeUp 0.35s ease both;
+    }
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(8px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== Dropdown row + inline "+" toggle ===== */
+    .field-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+    }
+    .field-row .form-select { flex: 1; }
+
+    .add-toggle-btn {
+        flex-shrink: 0;
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        border: 1px solid rgba(42, 247, 255, 0.35);
+        background: rgba(42, 247, 255, 0.08);
+        color: var(--accent-cyan);
+        font-size: 22px;
+        font-weight: 700;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: transform 0.15s ease, background 0.2s ease;
+    }
+    .add-toggle-btn:hover {
+        background: rgba(42, 247, 255, 0.2);
+        transform: translateY(-1px);
+    }
+    .add-toggle-btn[aria-expanded="true"] {
+        transform: rotate(45deg);
+        background: rgba(255, 107, 107, 0.18);
+        border-color: rgba(255, 107, 107, 0.4);
+        color: var(--accent-coral);
+    }
+
+    /* ===== Inline manage panel ===== */
+    .manage-panel {
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        transition: max-height 0.3s ease, opacity 0.25s ease, margin 0.3s ease;
+        margin-top: 0;
+    }
+    .manage-panel.open {
+        max-height: 320px;
+        overflow-y: auto;
+        opacity: 1;
+        margin-top: 10px;
+    }
+    .manage-panel-inner {
+        background: rgba(10, 3, 60, 0.45);
+        border: 1px solid rgba(42, 247, 255, 0.15);
+        border-radius: var(--radius-md);
+        padding: 14px;
+    }
+
+    .manage-add-row {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+    .manage-add-row input {
+        flex: 1;
+    }
+    .manage-add-row button {
+        flex-shrink: 0;
+        border-radius: 10px;
+        border: none;
+        padding: 0 16px;
+        font-weight: 600;
+        background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
+        color: white;
+    }
+
+    .manage-list {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .manage-list-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: rgba(255,255,255,0.04);
+        border-radius: 8px;
+        padding: 6px 10px;
+        font-size: 0.9rem;
+        color: var(--text-bright);
+    }
+    .manage-list-item form { margin: 0; }
+    .manage-list-item .mini-delete {
+        background: rgba(255, 80, 80, 0.7);
+        border: none;
+        border-radius: 6px;
+        color: white;
+        font-size: 12px;
+        padding: 3px 8px;
+        cursor: pointer;
+        transition: background 0.15s ease;
+    }
+    .manage-list-item .mini-delete:hover {
+        background: rgba(255, 80, 80, 1);
+    }
+    .manage-empty {
+        color: var(--text-soft);
+        opacity: 0.6;
+        font-size: 0.85rem;
+        padding: 4px 2px;
+    }
+
     @media (max-width: 576px) {
         .btn-outline-primary, .btn-success, .btn-link { width: 100%; }
     }
@@ -101,6 +228,10 @@
 <div class="ai-card">
 
     <h2 class="mb-4 text-center">Add Transaction</h2>
+
+    {% if error %}
+    <div class="form-error">⚠ {{ error }}</div>
+    {% endif %}
 
     <form method="post">
 
@@ -128,31 +259,100 @@
         <!-- Card Dropdown -->
         <div class="mb-3">
             <label class="form-label">Card Used</label>
-            <select name="card_id" class="form-select">
-                {% for card in cards %}
-                    <option value="{{ card['card_id'] }}">{{ card['name'] }}</option>
-                {% endfor %}
-            </select>
+            <div class="field-row">
+                <select name="card_id" class="form-select" id="card_select">
+                    {% for card in cards %}
+                        <option value="{{ card['card_id'] }}">{{ card['name'] }}</option>
+                    {% endfor %}
+                </select>
+                <button type="button" class="add-toggle-btn" aria-expanded="false" aria-controls="card_panel" onclick="togglePanel('card_panel', this)" title="Add or remove cards">+</button>
+            </div>
+            <div class="manage-panel" id="card_panel">
+                <div class="manage-panel-inner">
+                    <form class="manage-add-row" method="post" action="{{ url_for('add_lookup', kind='card') }}">
+                        <input type="text" name="name" class="form-control" placeholder="New card name (e.g. Chase Sapphire)" required maxlength="50">
+                        <button type="submit">Add</button>
+                    </form>
+                    <div class="manage-list">
+                        {% for card in cards %}
+                        <div class="manage-list-item">
+                            <span>{{ card['name'] }}</span>
+                            <form method="post" action="{{ url_for('delete_lookup', kind='card', item_id=card['card_id']) }}" onsubmit='return confirm("Delete card " + {{ card["name"] | tojson }} + "?");'>
+                                <button type="submit" class="mini-delete">Delete</button>
+                            </form>
+                        </div>
+                        {% else %}
+                        <div class="manage-empty">No cards yet — add one above.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Category (for Spending only) -->
         <div class="mb-3" id="category_div">
             <label class="form-label">Category</label>
-            <select name="category_id" class="form-select">
-                {% for cat in categories %}
-                    <option value="{{ cat['category_id'] }}">{{ cat['name'] }}</option>
-                {% endfor %}
-            </select>
+            <div class="field-row">
+                <select name="category_id" class="form-select" id="category_select">
+                    {% for cat in categories %}
+                        <option value="{{ cat['category_id'] }}">{{ cat['name'] }}</option>
+                    {% endfor %}
+                </select>
+                <button type="button" class="add-toggle-btn" aria-expanded="false" aria-controls="category_panel" onclick="togglePanel('category_panel', this)" title="Add or remove categories">+</button>
+            </div>
+            <div class="manage-panel" id="category_panel">
+                <div class="manage-panel-inner">
+                    <form class="manage-add-row" method="post" action="{{ url_for('add_lookup', kind='category') }}">
+                        <input type="text" name="name" class="form-control" placeholder="New category (e.g. Groceries)" required maxlength="50">
+                        <button type="submit">Add</button>
+                    </form>
+                    <div class="manage-list">
+                        {% for cat in categories %}
+                        <div class="manage-list-item">
+                            <span>{{ cat['name'] }}</span>
+                            <form method="post" action="{{ url_for('delete_lookup', kind='category', item_id=cat['category_id']) }}" onsubmit='return confirm("Delete category " + {{ cat["name"] | tojson }} + "?");'>
+                                <button type="submit" class="mini-delete">Delete</button>
+                            </form>
+                        </div>
+                        {% else %}
+                        <div class="manage-empty">No categories yet — add one above.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Bills (Only visible for Bill type) -->
         <div class="mb-3" id="bill_div" style="display:none;">
             <label class="form-label">Bill Name</label>
-            <select name="bill_id" class="form-select">
-                {% for bill in bills %}
-                    <option value="{{ bill['bill_id'] }}">{{ bill['name'] }}</option>
-                {% endfor %}
-            </select>
+            <div class="field-row">
+                <select name="bill_id" class="form-select" id="bill_select">
+                    {% for bill in bills %}
+                        <option value="{{ bill['bill_id'] }}">{{ bill['name'] }}</option>
+                    {% endfor %}
+                </select>
+                <button type="button" class="add-toggle-btn" aria-expanded="false" aria-controls="bill_panel" onclick="togglePanel('bill_panel', this)" title="Add or remove bills">+</button>
+            </div>
+            <div class="manage-panel" id="bill_panel">
+                <div class="manage-panel-inner">
+                    <form class="manage-add-row" method="post" action="{{ url_for('add_lookup', kind='bill') }}">
+                        <input type="text" name="name" class="form-control" placeholder="New bill (e.g. Rent)" required maxlength="50">
+                        <button type="submit">Add</button>
+                    </form>
+                    <div class="manage-list">
+                        {% for bill in bills %}
+                        <div class="manage-list-item">
+                            <span>{{ bill['name'] }}</span>
+                            <form method="post" action="{{ url_for('delete_lookup', kind='bill', item_id=bill['bill_id']) }}" onsubmit='return confirm("Delete bill " + {{ bill["name"] | tojson }} + "?");'>
+                                <button type="submit" class="mini-delete">Delete</button>
+                            </form>
+                        </div>
+                        {% else %}
+                        <div class="manage-empty">No bills yet — add one above.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="d-flex flex-wrap justify-content-center gap-3">
@@ -173,6 +373,13 @@ function toggleType() {
 
     document.getElementById("category_div").style.display = isSpending ? "block" : "none";
     document.getElementById("bill_div").style.display     = isSpending ? "none"  : "block";
+}
+
+function togglePanel(panelId, btn) {
+    const panel = document.getElementById(panelId);
+    const isOpen = panel.classList.toggle('open');
+    btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    btn.textContent = isOpen ? '\u00d7' : '+';
 }
 </script>
 
