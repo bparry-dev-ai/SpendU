@@ -7,7 +7,7 @@ app = Flask(__name__, instance_relative_config=True)
 
 def get_db_connection():
     """Helper function to connect to the database easily."""
-    db_path = os.path.join(app.instance_path, 'spending.db')
+    db_path = '/app/spending.db'
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     return conn
