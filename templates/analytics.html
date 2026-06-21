@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+    .page-title {
+        text-align: center;
+        text-shadow: 0 0 14px rgba(42, 247, 255, 0.45);
+        font-family: 'Space Grotesk', sans-serif;
+        margin-bottom: 2rem;
+        animation: fadeDown 0.5s ease both;
+    }
+
+    @keyframes fadeDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(14px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-title, .section-total {
+        text-shadow: 0 0 12px rgba(42, 247, 255, 0.4);
+        color: var(--text-soft);
+        margin-bottom: 18px;
+    }
+    .section-title { text-align: left; }
+    .section-total { text-align: right; font-weight: 600; }
+
+    .ai-table-container {
+        background: var(--glass);
+        border-radius: var(--radius-lg);
+        border: 1px solid rgba(122, 247, 255, 0.15);
+        box-shadow: 0 0 28px rgba(42, 247, 255, 0.30);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        padding: 25px;
+        margin-bottom: 2.5rem;
+        animation: fadeUp 0.5s ease both;
+    }
+
+    .table thead th {
+        color: var(--accent-cyan);
+        border-bottom: 2px solid rgba(42, 247, 255, 0.25);
+        background: rgba(10, 3, 60, 0.4);
+        text-shadow: 0 0 10px rgba(42, 247, 255, 0.25);
+        font-size: 0.82rem;
+        letter-spacing: 0.04em;
+    }
+
+    .table tbody tr {
+        background: rgba(10, 3, 60, 0.25);
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        opacity: 0;
+        animation: rowIn 0.4s ease forwards;
+    }
+    /* Stagger the first dozen visible rows; later rows just appear without delay stacking forever */
+    .table tbody tr:nth-child(1)  { animation-delay: 0.02s; }
+    .table tbody tr:nth-child(2)  { animation-delay: 0.05s; }
+    .table tbody tr:nth-child(3)  { animation-delay: 0.08s; }
+    .table tbody tr:nth-child(4)  { animation-delay: 0.11s; }
+    .table tbody tr:nth-child(5)  { animation-delay: 0.14s; }
+    .table tbody tr:nth-child(6)  { animation-delay: 0.17s; }
+    .table tbody tr:nth-child(7)  { animation-delay: 0.20s; }
+    .table tbody tr:nth-child(8)  { animation-delay: 0.23s; }
+    .table tbody tr:nth-child(n+9) { animation-delay: 0.25s; }
+
+    @keyframes rowIn {
+        from { opacity: 0; transform: translateY(6px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .table tbody tr:hover {
+        background: rgba(42, 247, 255, 0.12);
+        transition: background 0.25s ease;
+    }
+
+    /* FIX: previous theme set table cell text to near-black (#1A1F33) on a
+       near-black translucent background, making rows unreadable. Use the
+       bright theme text color instead so amounts/categories are legible. */
+    .table td {
+        color: var(--text-bright);
+        vertical-align: middle;
+    }
+
+    .delete-btn {
+        background: rgba(255, 80, 80, 0.75);
+        border: none;
+        padding: 6px 10px;
+        border-radius: 10px;
+        font-size: 14px;
+        color: white;
+        font-weight: 600;
+        box-shadow: 0 0 12px rgba(255, 80, 80, 0.45);
+        transition: transform 0.15s ease, background 0.2s ease;
+    }
+    .delete-btn:hover {
+        background: rgba(255, 80, 80, 1);
+        transform: scale(1.08);
+    }
+
+    .btn-primary {
+        background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
+        border-radius: var(--radius-md);
+        border: none;
+        font-weight: 600;
+        box-shadow: 0 0 15px rgba(42, 247, 255, 0.25);
+    }
+
+    /* Filter form selects auto-submit on change for a snappier feel */
+    .filter-form select { cursor: pointer; }
+
+    @media (max-width: 768px) {
+        .ai-table-container { padding: 16px; }
+        .table { font-size: 0.85rem; }
+        .section-total { text-align: left; margin-top: 4px; }
+    }
+</style>
+
+<!-- PAGE TITLE -->
+<h2 class="page-title">SpendU Analytics</h2>
+
+<form method="GET" class="ai-table-container mb-4 filter-form">
+    <h3 class="section-title">Filters</h3>
+
+    <div class="row g-3 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label">Card</label>
+            <select name="card_id" class="form-select" onchange="this.form.submit()">
+                <option value="">All cards</option>
+                {% for card in cards %}
+                    <option value="{{ card['card_id'] }}"
+                        {% if request.args.get('card_id') == (card['card_id'] | string) %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ card['name'] }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label">Range</label>
+            <select name="range" class="form-select" onchange="this.form.submit()">
+                <option value="7"  {% if selected_range == 7  %}selected{% endif %}>Last 7 days</option>
+                <option value="14" {% if selected_range == 14 %}selected{% endif %}>Last 14 days</option>
+                <option value="30" {% if selected_range == 30 %}selected{% endif %}>Last 30 days</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <button class="btn btn-primary w-100">Apply</button>
+        </div>
+
+        <div class="col-md-2">
+            <a href="{{ url_for('analytics') }}" class="btn btn-outline-dark w-100">
+                Clear
+            </a>
+        </div>
+    </div>
+</form>
+
+
+<!-- RECENT SPENDING TABLE -->
+<div class="ai-table-container">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
+        <h3 class="section-title mb-0">RECENT SPENDING</h3>
+        <span class="section-total mb-0">{{ selected_range }}-Day Total: ${{ "%.2f" | format(stotal) }}</span>
+    </div>
+    <div class="table-responsive">
+    <table class="table table-borderless align-middle">
+        <thead>
+            <tr>
+                <th>DATE</th>
+                <th>CATEGORY</th>
+                <th>CARD</th>
+                <th>AMOUNT</th>
+                <th style="width: 90px;">DELETE</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in spending %}
+            <tr>
+                <td>{{ row['date'] }}</td>
+                <td>{{ row['category'] }}</td>
+                <td>{{ row['card'] }}</td>
+                <td style="color: var(--accent-coral);">${{ "%.2f"|format(row['amount']) }}</td>
+                <td>
+                    <form method="POST"
+                          action="{{ url_for('delete_transaction', id=row['id']) }}"
+                          onsubmit="return confirm('Delete this spending transaction?');">
+                        <button class="delete-btn" type="submit">🗑</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" class="text-center text-muted">No spending found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<!-- RECENT BILLS TABLE -->
+<div class="ai-table-container">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
+        <h3 class="section-title mb-0">RECENT BILLS</h3>
+        <span class="section-total mb-0">{{ selected_range }}-Day Total: ${{ "%.2f" | format(btotal) }}</span>
+    </div>
+    <div class="table-responsive">
+    <table class="table table-borderless align-middle">
+        <thead>
+            <tr>
+                <th>DATE</th>
+                <th>BILL</th>
+                <th>CARD</th>
+                <th>AMOUNT</th>
+                <th style="width: 90px;">DELETE</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in bills %}
+            <tr>
+                <td>{{ row['date'] }}</td>
+                <td>{{ row['bill_name'] }}</td>
+                <td>{{ row['card'] }}</td>
+                <td style="color: var(--accent-coral);">${{ "%.2f"|format(row['amount']) }}</td>
+                <td>
+                    <form method="POST"
+                          action="{{ url_for('delete_bill', id=row['id']) }}"
+                          onsubmit="return confirm('Delete this bill transaction?');">
+                        <button class="delete-btn" type="submit">🗑</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" class="text-center text-muted">No bills found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<div class="text-center">
+    <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">⬅ Back to Home</a>
+</div>
+
+{% endblock %}

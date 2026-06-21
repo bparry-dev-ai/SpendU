@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+    /* ===== SpendU Logo ===== */
+    .logo-container {
+        margin-top: 30px;
+        margin-bottom: 20px;
+        text-align: center;
+        animation: fadeDown 0.6s ease both;
+    }
+
+    @keyframes fadeDown {
+        from { opacity: 0; transform: translateY(-12px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .logo-icon {
+        width: 90px;
+        height: 90px;
+        background: radial-gradient(circle at 30% 30%, var(--accent-cyan), var(--accent-violet));
+        border-radius: 22px;
+        box-shadow: 0 0 25px rgba(42, 247, 255, 0.4);
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 56px;
+        font-weight: 700;
+        font-family: 'Space Grotesk', sans-serif;
+        color: white;
+        letter-spacing: -2px;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        animation: pulseGlow 4s ease-in-out infinite;
+    }
+
+    @keyframes pulseGlow {
+        0%, 100% { box-shadow: 0 0 25px rgba(42, 247, 255, 0.4); }
+        50%      { box-shadow: 0 0 42px rgba(42, 247, 255, 0.7); }
+    }
+
+    .logo-text {
+        font-size: 38px;
+        font-weight: 800;
+        font-family: 'Space Grotesk', sans-serif;
+        margin-top: 10px;
+        background: linear-gradient(90deg, var(--accent-cyan), var(--accent-violet));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* ===== Date / Time ===== */
+    .datetime-block {
+        text-align: center;
+        margin-bottom: 2.5rem;
+        animation: fadeDown 0.6s 0.1s ease both;
+        color: var(--text-soft);
+    }
+    .datetime-block h4 {
+        font-weight: 400;
+        opacity: 0.85;
+    }
+
+    /* ===== Spend Summary Card ===== */
+    .spend-summary {
+        animation: fadeUp 0.6s 0.15s ease both;
+        position: relative;
+        overflow: hidden;
+    }
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(16px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .spend-amount {
+        color: var(--accent-coral);
+        text-shadow: 0 0 18px rgba(255, 107, 107, 0.45);
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+    }
+
+    /* ===== Action Buttons ===== */
+    .action-row {
+        animation: fadeUp 0.6s 0.25s ease both;
+    }
+    .btn-primary, .btn-outline-dark {
+        width: 260px;
+        border-radius: var(--radius-md) !important;
+    }
+
+    @media (max-width: 576px) {
+        .btn-primary, .btn-outline-dark { width: 100%; }
+    }
+</style>
+
+<!-- ===== SpendU Logo + Branding ===== -->
+<div class="logo-container">
+    <div class="logo-icon">S</div>
+    <div class="logo-text">SpendU</div>
+</div>
+
+<!-- ===== Date + Time ===== -->
+<div class="datetime-block">
+    <h3>{{ date }}</h3>
+    <h4>{{ time }}</h4>
+</div>
+
+<!-- ===== Spending Summary ===== -->
+<div class="card p-4 mb-4 text-center ai-card spend-summary">
+    <h5 class="card-title">Spending for {{ wkbegin }} - {{ wkend }}</h5>
+    <h1 class="display-4 spend-amount">$<span id="spendCounter" data-target="{{ spent }}">0.00</span></h1>
+</div>
+
+<!-- ===== Buttons ===== -->
+<div class="d-flex flex-wrap justify-content-center gap-3 action-row">
+    <a href="{{ url_for('add_transaction') }}" class="btn btn-primary">➕ Add Transaction</a>
+    <a href="{{ url_for('analytics') }}" class="btn btn-outline-dark">📊 View Analytics</a>
+</div>
+
+<script>
+    // Animated count-up for the weekly spend total
+    (function () {
+        const el = document.getElementById('spendCounter');
+        if (!el) return;
+        const target = parseFloat(el.dataset.target) || 0;
+        const duration = 900; // ms
+        const start = performance.now();
+
+        function tick(now) {
+            const progress = Math.min((now - start) / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3); // ease-out-cubic
+            el.textContent = (target * eased).toFixed(2);
+            if (progress < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+    })();
+</script>
+
+{% endblock %}
