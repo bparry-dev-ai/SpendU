@@ -97,27 +97,37 @@ def add_transaction():
     return render_template('add.html', cards=cards, bills=bills, categories=categories)
 
 
+VALID_RANGES = (7, 14, 30)
+
 @app.route('/analytics')
 def analytics():
     conn = get_db_connection()
-    
+
     card_id = request.args.get('card_id')
 
+    # Range filter: 7 / 14 / 30 trailing days, ending today. Defaults to 7.
+    try:
+        range_days = int(request.args.get('range', 7))
+    except ValueError:
+        range_days = 7
+    if range_days not in VALID_RANGES:
+        range_days = 7
+
+    now = datetime.now()
+    begin = now - timedelta(days=range_days - 1)
+    begin_str = begin.strftime("%Y-%m-%d")
+    end_str = now.strftime("%Y-%m-%d")
+
     cards = conn.execute('SELECT * FROM card_info').fetchall()
-    
+
+    # ---- Recent spending (table is unfiltered by range, just by card, like before) ----
     spending_where = []
     spending_params = []
-    
     if card_id:
         spending_where.append("s.card_id = ?")
         spending_params.append(card_id)
-        
-    spending_where_sql = (
-        "WHERE " + " AND ".join(spending_where)
-        if spending_where else ""
-        )
-    
-    # Recent spending
+    spending_where_sql = ("WHERE " + " AND ".join(spending_where)) if spending_where else ""
+
     spending_query = f"""
         SELECT s.id, s.date, s.amount,
                c.name AS category,
@@ -130,49 +140,26 @@ def analytics():
         LIMIT 20
     """
     recent_spending = conn.execute(spending_query, spending_params).fetchall()
-    
-    # Spending Card total
-    s_where = []
-    s_params = []
-    
+
+    # ---- Spending total for the selected range ----
+    s_where = ["date BETWEEN ? AND ?"]
+    s_params = [begin_str, end_str]
     if card_id:
         s_where.append("card_id = ?")
         s_params.append(card_id)
-    
-    now = datetime.now()
-    
-    begin = now - timedelta(days= 6)
-    end = now + timedelta(days= 6)
-    
-    begin_str = begin.strftime("%Y-%m-%d")
-    end_str = end.strftime("%Y-%m-%d")
-    
-    s_where.append("date BETWEEN ? AND ?")
-    s_params.extend([begin_str, end_str])
-    
-    where_sql = "WHERE " + " AND ".join(s_where)
-    
-    s_card_total_query = f"""
-        SELECT COALESCE(SUM(amount), 0)
-        FROM spending 
-        {where_sql}
-    """
-    result = conn.execute(s_card_total_query, s_params).fetchone()
-    s_card_total = result[0]
+    s_where_sql = "WHERE " + " AND ".join(s_where)
 
+    s_card_total_query = f"SELECT COALESCE(SUM(amount), 0) FROM spending {s_where_sql}"
+    s_card_total = conn.execute(s_card_total_query, s_params).fetchone()[0]
+
+    # ---- Recent bills (table unfiltered by range, just by card) ----
     bill_where = []
     bill_params = []
-    
     if card_id:
         bill_where.append("b.card_id = ?")
         bill_params.append(card_id)
-        
-    bill_where_sql = (
-        "WHERE " + " AND ".join(bill_where)
-        if bill_where else ""
-        )
-    
-    # Recent bills
+    bill_where_sql = ("WHERE " + " AND ".join(bill_where)) if bill_where else ""
+
     bills_query = f"""
         SELECT b.id, b.date, b.amount,
                bi.name AS bill_name,
@@ -185,27 +172,17 @@ def analytics():
         LIMIT 10
     """
     recent_bills = conn.execute(bills_query, bill_params).fetchall()
-    
-    # Bill Card total
-    b_where = []
-    b_params = []
-    
+
+    # ---- Bill total for the selected range ----
+    b_where = ["date BETWEEN ? AND ?"]
+    b_params = [begin_str, end_str]
     if card_id:
         b_where.append("card_id = ?")
         b_params.append(card_id)
-    
-    b_where.append("date BETWEEN ? AND ?")
-    b_params.extend([begin_str, end_str])
-    
     b_where_sql = "WHERE " + " AND ".join(b_where)
-    
-    b_card_total_query = f"""
-        SELECT COALESCE(SUM(amount), 0)
-        FROM bills 
-        {b_where_sql}
-    """
-    result = conn.execute(b_card_total_query, b_params).fetchone()
-    b_card_total = result[0]
+
+    b_card_total_query = f"SELECT COALESCE(SUM(amount), 0) FROM bills {b_where_sql}"
+    b_card_total = conn.execute(b_card_total_query, b_params).fetchone()[0]
 
     conn.close()
 
@@ -215,7 +192,8 @@ def analytics():
         bills=recent_bills,
         btotal=b_card_total,
         stotal=s_card_total,
-        cards=cards
+        cards=cards,
+        selected_range=range_days
     )
 
 

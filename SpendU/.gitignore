@@ -1,7 +1,9 @@
-.db
-instance/spending.db
+*.db
+instance/
 __pycache__/
 *.pyc
 venv/
 env/
 .env
+backup_files/
+spending.db
