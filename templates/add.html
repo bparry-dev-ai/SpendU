@@ -233,7 +233,7 @@
     <div class="form-error">⚠ {{ error }}</div>
     {% endif %}
 
-    <form method="post">
+    <form id="transaction_form" method="post">
 
         <!-- Toggle Spending / Bill -->
         <div class="d-flex flex-wrap justify-content-center gap-3 mb-3">
@@ -269,17 +269,15 @@
             </div>
             <div class="manage-panel" id="card_panel">
                 <div class="manage-panel-inner">
-                    <form class="manage-add-row" method="post" action="{{ url_for('add_lookup', kind='card') }}">
-                        <input type="text" name="name" class="form-control" placeholder="New card name (e.g. Chase Sapphire)" required maxlength="50">
-                        <button type="submit">Add</button>
-                    </form>
+                    <div class="manage-add-row">
+                        <input type="text" name="name" form="add_card_form" class="form-control" placeholder="New card name (e.g. Chase Sapphire)" required maxlength="50">
+                        <button type="submit" form="add_card_form">Add</button>
+                    </div>
                     <div class="manage-list">
                         {% for card in cards %}
                         <div class="manage-list-item">
                             <span>{{ card['name'] }}</span>
-                            <form method="post" action="{{ url_for('delete_lookup', kind='card', item_id=card['card_id']) }}" onsubmit='return confirm("Delete card " + {{ card["name"] | tojson }} + "?");'>
-                                <button type="submit" class="mini-delete">Delete</button>
-                            </form>
+                            <button type="submit" class="mini-delete" form="delete_card_{{ card['card_id'] }}">Delete</button>
                         </div>
                         {% else %}
                         <div class="manage-empty">No cards yet — add one above.</div>
@@ -302,17 +300,15 @@
             </div>
             <div class="manage-panel" id="category_panel">
                 <div class="manage-panel-inner">
-                    <form class="manage-add-row" method="post" action="{{ url_for('add_lookup', kind='category') }}">
-                        <input type="text" name="name" class="form-control" placeholder="New category (e.g. Groceries)" required maxlength="50">
-                        <button type="submit">Add</button>
-                    </form>
+                    <div class="manage-add-row">
+                        <input type="text" name="name" form="add_category_form" class="form-control" placeholder="New category (e.g. Groceries)" required maxlength="50">
+                        <button type="submit" form="add_category_form">Add</button>
+                    </div>
                     <div class="manage-list">
                         {% for cat in categories %}
                         <div class="manage-list-item">
                             <span>{{ cat['name'] }}</span>
-                            <form method="post" action="{{ url_for('delete_lookup', kind='category', item_id=cat['category_id']) }}" onsubmit='return confirm("Delete category " + {{ cat["name"] | tojson }} + "?");'>
-                                <button type="submit" class="mini-delete">Delete</button>
-                            </form>
+                            <button type="submit" class="mini-delete" form="delete_category_{{ cat['category_id'] }}">Delete</button>
                         </div>
                         {% else %}
                         <div class="manage-empty">No categories yet — add one above.</div>
@@ -335,17 +331,15 @@
             </div>
             <div class="manage-panel" id="bill_panel">
                 <div class="manage-panel-inner">
-                    <form class="manage-add-row" method="post" action="{{ url_for('add_lookup', kind='bill') }}">
-                        <input type="text" name="name" class="form-control" placeholder="New bill (e.g. Rent)" required maxlength="50">
-                        <button type="submit">Add</button>
-                    </form>
+                    <div class="manage-add-row">
+                        <input type="text" name="name" form="add_bill_form" class="form-control" placeholder="New bill (e.g. Rent)" required maxlength="50">
+                        <button type="submit" form="add_bill_form">Add</button>
+                    </div>
                     <div class="manage-list">
                         {% for bill in bills %}
                         <div class="manage-list-item">
                             <span>{{ bill['name'] }}</span>
-                            <form method="post" action="{{ url_for('delete_lookup', kind='bill', item_id=bill['bill_id']) }}" onsubmit='return confirm("Delete bill " + {{ bill["name"] | tojson }} + "?");'>
-                                <button type="submit" class="mini-delete">Delete</button>
-                            </form>
+                            <button type="submit" class="mini-delete" form="delete_bill_{{ bill['bill_id'] }}">Delete</button>
                         </div>
                         {% else %}
                         <div class="manage-empty">No bills yet — add one above.</div>
@@ -361,6 +355,24 @@
         </div>
     </form>
 </div>
+
+
+<!-- Lookup-management forms live outside the main transaction form.
+     This matters because HTML does not allow forms inside forms; nested forms
+     can cause browsers to close the transaction form early and break submit buttons. -->
+<form id="add_card_form" method="post" action="{{ url_for('add_lookup', kind='card') }}"></form>
+<form id="add_category_form" method="post" action="{{ url_for('add_lookup', kind='category') }}"></form>
+<form id="add_bill_form" method="post" action="{{ url_for('add_lookup', kind='bill') }}"></form>
+
+{% for card in cards %}
+<form id="delete_card_{{ card['card_id'] }}" method="post" action="{{ url_for('delete_lookup', kind='card', item_id=card['card_id']) }}" onsubmit='return confirm("Delete card " + {{ card["name"] | tojson }} + "?");'></form>
+{% endfor %}
+{% for cat in categories %}
+<form id="delete_category_{{ cat['category_id'] }}" method="post" action="{{ url_for('delete_lookup', kind='category', item_id=cat['category_id']) }}" onsubmit='return confirm("Delete category " + {{ cat["name"] | tojson }} + "?");'></form>
+{% endfor %}
+{% for bill in bills %}
+<form id="delete_bill_{{ bill['bill_id'] }}" method="post" action="{{ url_for('delete_lookup', kind='bill', item_id=bill['bill_id']) }}" onsubmit='return confirm("Delete bill " + {{ bill["name"] | tojson }} + "?");'></form>
+{% endfor %}
 
 <!-- JavaScript -->
 <script>
