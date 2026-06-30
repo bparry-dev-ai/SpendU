@@ -17,7 +17,7 @@ LOOKUP_TABLES = {
         "table": "card_info",
         "id_column": "card_id",
         "usage_checks": [
-            ("spending", "card_id")
+            ("spending", "card_id"),
             ("bills", "card_id"),
         ],
         "label": "card",
