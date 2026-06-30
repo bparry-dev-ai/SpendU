@@ -87,6 +87,7 @@ def add_transaction():
     conn = get_db_connection()
 
     if request.method == 'POST':
+        print(dict(request.form), flush=True)
         trans_type = request.form.get('type')
         amount = request.form.get('amount')
         date_val = request.form.get('date')
