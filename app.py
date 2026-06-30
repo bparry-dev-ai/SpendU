@@ -12,6 +12,46 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
+LOOKUP_TABLES = {
+    "card": {
+        "table": "card_info",
+        "id_column": "card_id",
+        "usage_checks": [
+            ("spending", "card_id")
+            ("bills", "card_id"),
+        ],
+        "label": "card",
+    },
+    "category": {
+        "table": "category_info",
+        "id_column": "category_id",
+        "usage_checks": [
+            ("spending", "category_id"),
+        ],
+        "label": "category",
+    },
+    "bill": {
+        "table": "bill_info",
+        "id_column": "bill_id",
+        "usage_checks": [
+            ("bills", "bill_id"),
+        ],
+    },
+}
+
+def load_lookup_data(conn):
+    """Load dropdown data for the Add Transaction Page"""
+    return {
+        "cards": conn.execute("SELECT * FROM card_info ORDER BY name").fetchall(),
+        "bills": conn.execute("SELECT * FROM bill_info ORDER BY name").fetchall(),
+        "categories": conn.execute("SELECT * FROM category_info ORDER BY name").fetchall(),
+    }
+
+def render_add_form(conn, error=None, status_code=200):
+    """Render add.html with all dropdown lists and an optional error message."""
+    data = load_lookup_data(conn)
+    return render_template("add.html", error=error, **data), status_code
+
 @app.route('/')
 def index():
     """The Homepage: Shows date, time, and weekly spending."""
@@ -95,6 +135,57 @@ def add_transaction():
     conn.close()
 
     return render_template('add.html', cards=cards, bills=bills, categories=categories)
+
+@app.route("/lookup/<kind>/add", methods=["POST"])
+def add_lookup(kind):
+    """Add a card, spending category, or bill type from the Add Transaction page."""
+    config = LOOKUP_TABLES.get(kind)
+    if not config:
+        return redirect(url_for("add_transaction", error="Unknown list type."))
+
+    name = (request.form.get("name") or "").strip()
+    if not name:
+        return redirect(url_for("add_transaction", error=f"Please enter a {config['label']} name."))
+
+    conn = get_db_connection()
+    try:
+        conn.execute(f"INSERT INTO {config['table']} (name) VALUES (?)", (name,))
+        conn.commit()
+    except sqlite3.IntegrityError:
+        conn.close()
+        return redirect(url_for("add_transaction", error=f"That {config['label']} already exists."))
+
+    conn.close()
+    return redirect(url_for("add_transaction"))
+
+
+@app.route("/lookup/<kind>/<int:item_id>/delete", methods=["POST"])
+def delete_lookup(kind, item_id):
+    """Delete a card, spending category, or bill type if it is not used by transactions."""
+    config = LOOKUP_TABLES.get(kind)
+    if not config:
+        return redirect(url_for("add_transaction", error="Unknown list type."))
+
+    conn = get_db_connection()
+    for table, column in config["usage_checks"]:
+        used_count = conn.execute(
+            f"SELECT COUNT(*) FROM {table} WHERE {column} = ?", (item_id,)
+        ).fetchone()[0]
+        if used_count:
+            conn.close()
+            return redirect(
+                url_for(
+                    "add_transaction",
+                    error=f"You cannot delete that {config['label']} because it is used by existing transactions.",
+                )
+            )
+
+    conn.execute(
+        f"DELETE FROM {config['table']} WHERE {config['id_column']} = ?", (item_id,)
+    )
+    conn.commit()
+    conn.close()
+    return redirect(url_for("add_transaction"))
 
 
 VALID_RANGES = (7, 14, 30)
