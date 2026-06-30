@@ -365,13 +365,13 @@
 <form id="add_bill_form" method="post" action="{{ url_for('add_lookup', kind='bill') }}"></form>
 
 {% for card in cards %}
-<form id="delete_card_{{ card['card_id'] }}" method="post" action="{{ url_for('delete_lookup', kind='card', item_id=card['card_id']) }}" onsubmit='return confirm("Delete card " + {{ card["name"] | tojson }} + "?");'></form>
+<form id="delete_card_{{ card['card_id'] }}" method="post" action="{{ url_for('delete_lookup', kind='card', item_id=card['card_id']) }}" onsubmit="return confirm('Delete card ' + {{ card['name'] | tojson }} + '?');"></form>
 {% endfor %}
 {% for cat in categories %}
-<form id="delete_category_{{ cat['category_id'] }}" method="post" action="{{ url_for('delete_lookup', kind='category', item_id=cat['category_id']) }}" onsubmit='return confirm("Delete category " + {{ cat["name"] | tojson }} + "?");'></form>
+<form id="delete_category_{{ cat['category_id'] }}" method="post" action="{{ url_for('delete_lookup', kind='category', item_id=cat['category_id']) }}" onsubmit="return confirm('Delete category ' + {{ cat['name'] | tojson }} + '?');"></form>
 {% endfor %}
 {% for bill in bills %}
-<form id="delete_bill_{{ bill['bill_id'] }}" method="post" action="{{ url_for('delete_lookup', kind='bill', item_id=bill['bill_id']) }}" onsubmit='return confirm("Delete bill " + {{ bill["name"] | tojson }} + "?");'></form>
+<form id="delete_bill_{{ bill['bill_id'] }}" method="post" action="{{ url_for('delete_lookup', kind='bill', item_id=bill['bill_id']) }}" onsubmit="return confirm('Delete bill ' + {{ bill['name'] | tojson }} + '?');"></form>
 {% endfor %}
 
 <!-- JavaScript -->
