@@ -1,0 +1,13 @@
+## Rebuild Commands
+-After editing code and pushing to github
+    -SSH into Ubuntu Server
+    -navigate to folder /opt/spendu/SpendU 
+    -git pull origin main
+    -docker compose build
+    -docker compose up -d 
+    -docker compose logs -f (check logs after redeployment) (errors will show)
+    -docker compose ps (checks if container is running)
+
+## Troubleshooting
+-added print(dict(request.form), flush=True) inside "if request.method == 'POST':"
+    -prints each request in the docker compose logs while the site is used

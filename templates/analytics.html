@@ -5,8 +5,7 @@
 <style>
     .page-title {
         text-align: center;
-        text-shadow: 0 0 14px rgba(42, 247, 255, 0.45);
-        font-family: 'Space Grotesk', sans-serif;
+        font-family: 'Quicksand', sans-serif;
         margin-bottom: 2rem;
         animation: fadeDown 0.5s ease both;
     }
@@ -21,37 +20,33 @@
     }
 
     .section-title, .section-total {
-        text-shadow: 0 0 12px rgba(42, 247, 255, 0.4);
-        color: var(--text-soft);
+        color: var(--text-main);
         margin-bottom: 18px;
     }
     .section-title { text-align: left; }
     .section-total { text-align: right; font-weight: 600; }
 
     .ai-table-container {
-        background: var(--glass);
+        background: var(--card-bg);
         border-radius: var(--radius-lg);
-        border: 1px solid rgba(122, 247, 255, 0.15);
-        box-shadow: 0 0 28px rgba(42, 247, 255, 0.30);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(142, 119, 102, 0.22);
+        box-shadow: 0 4px 18px rgba(83, 86, 107, 0.14);
         padding: 25px;
         margin-bottom: 2.5rem;
         animation: fadeUp 0.5s ease both;
     }
 
     .table thead th {
-        color: var(--accent-cyan);
-        border-bottom: 2px solid rgba(42, 247, 255, 0.25);
-        background: rgba(10, 3, 60, 0.4);
-        text-shadow: 0 0 10px rgba(42, 247, 255, 0.25);
+        color: var(--accent);
+        border-bottom: 2px solid rgba(142, 119, 102, 0.35);
+        background: rgba(255, 255, 255, 0.4);
         font-size: 0.82rem;
         letter-spacing: 0.04em;
     }
 
     .table tbody tr {
-        background: rgba(10, 3, 60, 0.25);
-        border-bottom: 1px solid rgba(255,255,255,0.06);
+        background: rgba(255, 255, 255, 0.35);
+        border-bottom: 1px solid rgba(142, 119, 102, 0.12);
         opacity: 0;
         animation: rowIn 0.4s ease forwards;
     }
@@ -72,40 +67,38 @@
     }
 
     .table tbody tr:hover {
-        background: rgba(42, 247, 255, 0.12);
+        background: rgba(142, 119, 102, 0.12);
         transition: background 0.25s ease;
     }
 
-    /* FIX: previous theme set table cell text to near-black (#1A1F33) on a
-       near-black translucent background, making rows unreadable. Use the
-       bright theme text color instead so amounts/categories are legible. */
     .table td {
-        color: var(--text-bright);
+        color: var(--text-main);
         vertical-align: middle;
     }
 
     .delete-btn {
-        background: rgba(255, 80, 80, 0.75);
+        background: var(--terracotta);
         border: none;
         padding: 6px 10px;
         border-radius: 10px;
         font-size: 14px;
-        color: white;
+        color: var(--wordmark);
         font-weight: 600;
-        box-shadow: 0 0 12px rgba(255, 80, 80, 0.45);
+        box-shadow: 0 2px 8px rgba(83, 86, 107, 0.20);
         transition: transform 0.15s ease, background 0.2s ease;
     }
     .delete-btn:hover {
-        background: rgba(255, 80, 80, 1);
+        background: #9E5546;
         transform: scale(1.08);
     }
 
     .btn-primary {
-        background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
+        background: var(--accent);
         border-radius: var(--radius-md);
         border: none;
         font-weight: 600;
-        box-shadow: 0 0 15px rgba(42, 247, 255, 0.25);
+        color: var(--wordmark);
+        box-shadow: 0 3px 12px rgba(83, 86, 107, 0.20);
     }
 
     /* Filter form selects auto-submit on change for a snappier feel */
@@ -167,7 +160,7 @@
 <div class="ai-table-container">
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
         <h3 class="section-title mb-0">RECENT SPENDING</h3>
-        <span class="section-total mb-0">{{ selected_range }}-Day Total: ${{ "%.2f" | format(stotal) }}</span>
+        <span class="section-total mb-0">Your {{ selected_range }}-Day Total: ${{ "%.2f" | format(stotal) }} &nbsp;·&nbsp; Family: ${{ "%.2f" | format(stotal_family) }}</span>
     </div>
     <div class="table-responsive">
     <table class="table table-borderless align-middle">
@@ -207,7 +200,7 @@
 <div class="ai-table-container">
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
         <h3 class="section-title mb-0">RECENT BILLS</h3>
-        <span class="section-total mb-0">{{ selected_range }}-Day Total: ${{ "%.2f" | format(btotal) }}</span>
+        <span class="section-total mb-0">Your {{ selected_range }}-Day Total: ${{ "%.2f" | format(btotal) }} &nbsp;·&nbsp; Family: ${{ "%.2f" | format(btotal_family) }}</span>
     </div>
     <div class="table-responsive">
     <table class="table table-borderless align-middle">

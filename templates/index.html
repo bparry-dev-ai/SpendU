@@ -6,7 +6,10 @@
     .logo-container {
         margin-top: 30px;
         margin-bottom: 20px;
-        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
         animation: fadeDown 0.6s ease both;
     }
 
@@ -18,34 +21,24 @@
     .logo-icon {
         width: 90px;
         height: 90px;
-        background: radial-gradient(circle at 30% 30%, var(--accent-cyan), var(--accent-violet));
+        background: var(--logo-tile);
         border-radius: 22px;
-        box-shadow: 0 0 25px rgba(42, 247, 255, 0.4);
+        box-shadow: 0 4px 16px rgba(83, 86, 107, 0.25);
         display: inline-flex;
         justify-content: center;
         align-items: center;
-        font-size: 56px;
-        font-weight: 700;
-        font-family: 'Space Grotesk', sans-serif;
-        color: white;
-        letter-spacing: -2px;
-        border: 2px solid rgba(255, 255, 255, 0.1);
-    }
-
-    @keyframes pulseGlow {
-        0%, 100% { box-shadow: 0 0 25px rgba(42, 247, 255, 0.4); }
-        50%      { box-shadow: 0 0 42px rgba(42, 247, 255, 0.7); }
+        font-size: 52px;
+        font-family: 'Satisfy', cursive;
+        color: var(--logo-letter);
+        border: 2px solid rgba(255, 255, 255, 0.25);
     }
 
     .logo-text {
-        font-size: 38px;
-        font-weight: 800;
-        font-family: 'Space Grotesk', sans-serif;
-        margin-top: 10px;
-        background: linear-gradient(90deg, var(--accent-cyan), var(--accent-violet));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        font-size: 56px;
+        font-family: 'Satisfy', cursive;
+        line-height: 1;
+        color: var(--wordmark);
+        text-shadow: 0 2px 8px rgba(83, 86, 107, 0.25);
     }
 
     /* ===== Date / Time ===== */
@@ -53,7 +46,7 @@
         text-align: center;
         margin-bottom: 2.5rem;
         animation: fadeDown 0.6s 0.1s ease both;
-        color: var(--text-soft);
+        color: var(--text-main);
     }
     .datetime-block h4 {
         font-weight: 400;
@@ -72,10 +65,26 @@
     }
 
     .spend-amount {
-        color: var(--accent-coral);
-        text-shadow: 0 0 18px rgba(255, 107, 107, 0.45);
-        font-family: 'Space Grotesk', sans-serif;
+        color: var(--text-main);
+        font-family: 'Quicksand', sans-serif;
         font-weight: 700;
+    }
+
+    .spend-summary .card-title {
+        color: var(--text-muted2);
+        font-weight: 500;
+    }
+
+    .family-divider {
+        border: none;
+        border-top: 1px solid rgba(142, 119, 102, 0.35);
+        width: 60%;
+        margin: 14px auto;
+        opacity: 1;
+    }
+
+    .family-amount {
+        font-weight: 600;
     }
 
     /* ===== Action Buttons ===== */
@@ -106,8 +115,11 @@
 
 <!-- ===== Spending Summary ===== -->
 <div class="card p-4 mb-4 text-center ai-card spend-summary">
-    <h5 class="card-title">Spending for {{ wkbegin }} - {{ wkend }}</h5>
-    <h1 class="display-4 spend-amount">$<span id="spendCounter" data-target="{{ spent }}">0.00</span></h1>
+    <h5 class="card-title">{{ username | capitalize }}'s spending for {{ wkbegin }} - {{ wkend }}</h5>
+    <h1 class="display-4 spend-amount">$<span class="count-up" data-target="{{ spent }}">0.00</span></h1>
+    <hr class="family-divider">
+    <h6 class="card-title mb-1">Family total</h6>
+    <h3 class="spend-amount family-amount">$<span class="count-up" data-target="{{ family_spent }}">0.00</span></h3>
 </div>
 
 <!-- ===== Buttons ===== -->
@@ -116,22 +128,77 @@
     <a href="{{ url_for('analytics') }}" class="btn btn-outline-dark">📊 View Analytics</a>
 </div>
 
-<script>
-    // Animated count-up for the weekly spend total
-    (function () {
-        const el = document.getElementById('spendCounter');
-        if (!el) return;
-        const target = parseFloat(el.dataset.target) || 0;
-        const duration = 900; // ms
-        const start = performance.now();
+<!-- ===== Passkey enrollment + Logout ===== -->
+<div class="d-flex flex-wrap justify-content-center gap-3 mt-4 action-row">
+    <button id="addPasskeyBtn" type="button" class="btn btn-outline-dark btn-sm d-none" style="width: auto;">
+        📱 Add Face ID / Passkey
+    </button>
+    <form method="post" action="{{ url_for('logout') }}" class="d-inline">
+        <button type="submit" class="btn btn-outline-dark btn-sm" style="width: auto;">🔒 Log Out</button>
+    </form>
+</div>
+<div id="passkeyMsg" class="text-center mt-2" style="display: none;"></div>
 
-        function tick(now) {
-            const progress = Math.min((now - start) / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3); // ease-out-cubic
-            el.textContent = (target * eased).toFixed(2);
-            if (progress < 1) requestAnimationFrame(tick);
-        }
-        requestAnimationFrame(tick);
+<script src="https://cdn.jsdelivr.net/npm/@simplewebauthn/browser@10.0.0/dist/bundle/index.umd.min.js"></script>
+<script>
+    // Passkey enrollment — only shown on browsers that support WebAuthn
+    (function () {
+        if (!window.SimpleWebAuthnBrowser || !SimpleWebAuthnBrowser.browserSupportsWebAuthn()) return;
+        const btn = document.getElementById('addPasskeyBtn');
+        btn.classList.remove('d-none');
+
+        btn.addEventListener('click', async function () {
+            const msg = document.getElementById('passkeyMsg');
+            msg.style.display = 'none';
+
+            function show(text, ok) {
+                msg.textContent = text;
+                msg.style.color = ok ? 'var(--accent-cyan)' : 'var(--accent-coral)';
+                msg.style.display = 'block';
+            }
+
+            try {
+                const options = await fetch("{{ url_for('passkey_register_begin') }}", { method: 'POST' })
+                    .then(r => r.json());
+                const attestation = await SimpleWebAuthnBrowser.startRegistration(options);
+                const result = await fetch("{{ url_for('passkey_register_complete') }}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(attestation),
+                }).then(r => r.json());
+                if (result.ok) {
+                    show('✅ Face ID added — you can use it on the sign-in screen from now on.', true);
+                    return;
+                }
+                throw new Error(result.error || 'Registration failed.');
+            } catch (e) {
+                if (e.name === 'NotAllowedError') return; // user cancelled the prompt
+                if (e.name === 'InvalidStateError') {
+                    show('This device already has a passkey for SpendU.', true);
+                    return;
+                }
+                show(e.message || 'Could not add Face ID on this device.', false);
+            }
+        });
+    })();
+</script>
+
+<script>
+    // Animated count-up for the weekly spend totals (yours + family)
+    (function () {
+        document.querySelectorAll('.count-up').forEach(function (el) {
+            const target = parseFloat(el.dataset.target) || 0;
+            const duration = 900; // ms
+            const start = performance.now();
+
+            function tick(now) {
+                const progress = Math.min((now - start) / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3); // ease-out-cubic
+                el.textContent = (target * eased).toFixed(2);
+                if (progress < 1) requestAnimationFrame(tick);
+            }
+            requestAnimationFrame(tick);
+        });
     })();
 </script>
 
