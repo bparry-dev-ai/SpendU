@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<style>
+    .login-wrap {
+        max-width: 420px;
+        margin: 40px auto;
+    }
+
+    .login-card {
+        padding: 40px 34px;
+    }
+
+    .login-title {
+        text-align: center;
+        font-family: 'Satisfy', cursive;
+        font-size: 2.4rem;
+        font-weight: 400;
+        color: var(--logo-tile);
+        margin-bottom: 6px;
+    }
+
+    .login-subtitle {
+        text-align: center;
+        color: var(--text-muted2);
+        font-size: 0.95rem;
+        margin-bottom: 28px;
+    }
+
+    .login-card .form-label {
+        color: var(--text-main);
+        font-weight: 600;
+    }
+
+    .login-card .form-control {
+        background: rgba(255, 255, 255, 0.65);
+        border: 1px solid rgba(142, 119, 102, 0.35);
+        border-radius: var(--radius-md);
+        color: var(--text-main);
+        padding: 12px 16px;
+    }
+
+    .login-card .form-control:focus {
+        background: rgba(255, 255, 255, 0.85);
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(142, 119, 102, 0.2);
+        color: var(--text-main);
+    }
+
+    .login-card .form-control::placeholder {
+        color: var(--text-muted2);
+    }
+
+    .login-error {
+        background: rgba(176, 106, 91, 0.14);
+        border: 1px solid rgba(176, 106, 91, 0.45);
+        color: #8C4A3D;
+        border-radius: var(--radius-md);
+        padding: 10px 16px;
+        margin-bottom: 20px;
+        font-size: 0.95rem;
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-wrap">
+    <div class="ai-card login-card">
+        <h2 class="login-title">SpendU</h2>
+        <p class="login-subtitle">Sign in to your spending tracker</p>
+
+        {% if error %}
+        <div class="login-error">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" action="{{ url_for('login') }}">
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" name="username"
+                       autocomplete="username" autofocus required>
+            </div>
+            <div class="mb-4">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password"
+                       autocomplete="current-password" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100" style="max-width: none;">Sign In</button>
+        </form>
+
+        <div id="passkeySection" class="d-none">
+            <div class="text-center my-3" style="color: var(--text-muted2); font-size: 0.9rem;">— or —</div>
+            <button id="passkeyBtn" type="button" class="btn btn-outline-dark w-100" style="max-width: none;">
+                🔐 Sign in with Face ID / Passkey
+            </button>
+            <div id="passkeyError" class="login-error mt-3 d-none"></div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@simplewebauthn/browser@10.0.0/dist/bundle/index.umd.min.js"></script>
+<script>
+    // Show the passkey button only on browsers that support WebAuthn
+    (function () {
+        if (!window.SimpleWebAuthnBrowser || !SimpleWebAuthnBrowser.browserSupportsWebAuthn()) return;
+        document.getElementById('passkeySection').classList.remove('d-none');
+
+        document.getElementById('passkeyBtn').addEventListener('click', async function () {
+            const errBox = document.getElementById('passkeyError');
+            errBox.classList.add('d-none');
+            try {
+                const options = await fetch("{{ url_for('passkey_login_begin') }}", { method: 'POST' })
+                    .then(r => r.json());
+                const assertion = await SimpleWebAuthnBrowser.startAuthentication(options);
+                const result = await fetch("{{ url_for('passkey_login_complete') }}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(assertion),
+                }).then(r => r.json());
+                if (result.ok) {
+                    window.location = "{{ url_for('index') }}";
+                    return;
+                }
+                throw new Error(result.error || 'Sign-in failed.');
+            } catch (e) {
+                if (e.name === 'NotAllowedError') return; // user cancelled the Face ID prompt
+                errBox.textContent = e.message || 'Face ID sign-in failed.';
+                errBox.classList.remove('d-none');
+            }
+        });
+    })();
+</script>
+{% endblock %}

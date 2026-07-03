@@ -14,38 +14,39 @@
     }
 
     h2 {
-        text-shadow: 0 0 12px rgba(42, 247, 255, 0.35);
-        color: var(--text-bright);
-        font-family: 'Space Grotesk', sans-serif;
+        color: var(--text-main);
+        font-family: 'Quicksand', sans-serif;
     }
 
     /* ===== Input + Select Fields ===== */
     .form-control, .form-select {
-        background: rgba(10, 3, 60, 0.35);
-        border: 1px solid rgba(42, 247, 255, 0.18);
-        color: var(--text-bright);
+        background: rgba(255, 255, 255, 0.65);
+        border: 1px solid rgba(142, 119, 102, 0.35);
+        color: var(--text-main);
         border-radius: var(--radius-md);
-        box-shadow: 0 0 14px rgba(66, 66, 66, 0.267);
         transition: box-shadow 0.2s ease, background 0.2s ease;
     }
 
     .form-control:focus, .form-select:focus {
-        border-color: var(--accent-cyan);
-        box-shadow: 0 0 18px rgba(42, 247, 255, 0.35);
-        background: rgba(10, 3, 60, 0.45);
-        color: white;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(142, 119, 102, 0.2);
+        background: rgba(255, 255, 255, 0.85);
+        color: var(--text-main);
+    }
+
+    .form-control::placeholder {
+        color: var(--text-muted2);
     }
 
     label {
         font-weight: 600;
-        color: var(--text-soft);
-        text-shadow: 0 0 6px rgba(42, 247, 255, 0.25);
+        color: var(--text-main);
     }
 
     /* ===== Toggle Buttons (Spending / Bill) ===== */
     .btn-outline-primary {
-        border-color: var(--accent-cyan);
-        color: var(--accent-cyan);
+        border-color: var(--accent);
+        color: var(--accent);
         border-radius: var(--radius-md);
         font-weight: 600;
         transition: 0.2s;
@@ -54,9 +55,9 @@
 
     .btn-outline-primary:hover,
     .btn-check:checked + .btn-outline-primary {
-        background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
-        color: white;
-        box-shadow: 0 0 18px rgba(42, 247, 255, 0.35);
+        background: var(--accent);
+        color: var(--wordmark);
+        box-shadow: 0 3px 12px rgba(83, 86, 107, 0.22);
         border-color: transparent;
     }
 
@@ -67,37 +68,39 @@
 
     /* ===== Save Button ===== */
     .btn-success {
-        background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
+        background: var(--accent);
         border: none;
         border-radius: var(--radius-md);
         font-weight: 700;
-        color: white;
-        box-shadow: 0 0 20px rgba(42, 247, 255, 0.35);
+        color: var(--wordmark);
+        box-shadow: 0 3px 14px rgba(83, 86, 107, 0.22);
         width: 260px;
     }
 
     .btn-success:hover {
-        background: linear-gradient(90deg, var(--accent-cyan), var(--accent-violet));
+        background: #7C6656;
+        color: var(--wordmark);
     }
 
     /* ===== Cancel Link ===== */
     .btn-link {
-        background: linear-gradient(135deg, #2A1E1E, #3A2323);
+        background: transparent;
         border-radius: var(--radius-md);
-        border: 1px solid #7A3F3F;
-        color: #E8A6A6 !important;
+        border: 1px solid var(--terracotta);
+        color: var(--terracotta) !important;
         font-weight: 700;
         width: 260px;
+        text-decoration: none;
     }
     .btn-link:hover {
-        background: linear-gradient(135deg, #3A2323, #4A2828);
+        background: rgba(176, 106, 91, 0.12);
     }
 
     /* ===== Error banner ===== */
     .form-error {
-        background: rgba(255, 80, 80, 0.12);
-        border: 1px solid rgba(255, 80, 80, 0.4);
-        color: #FFB3B3;
+        background: rgba(176, 106, 91, 0.14);
+        border: 1px solid rgba(176, 106, 91, 0.45);
+        color: #8C4A3D;
         border-radius: var(--radius-md);
         padding: 12px 16px;
         margin-bottom: 1.25rem;
@@ -122,9 +125,9 @@
         width: 44px;
         height: 44px;
         border-radius: 12px;
-        border: 1px solid rgba(42, 247, 255, 0.35);
-        background: rgba(42, 247, 255, 0.08);
-        color: var(--accent-cyan);
+        border: 1px solid rgba(142, 119, 102, 0.45);
+        background: rgba(142, 119, 102, 0.10);
+        color: var(--accent);
         font-size: 22px;
         font-weight: 700;
         line-height: 1;
@@ -135,14 +138,14 @@
         transition: transform 0.15s ease, background 0.2s ease;
     }
     .add-toggle-btn:hover {
-        background: rgba(42, 247, 255, 0.2);
+        background: rgba(142, 119, 102, 0.22);
         transform: translateY(-1px);
     }
     .add-toggle-btn[aria-expanded="true"] {
         transform: rotate(45deg);
-        background: rgba(255, 107, 107, 0.18);
-        border-color: rgba(255, 107, 107, 0.4);
-        color: var(--accent-coral);
+        background: rgba(176, 106, 91, 0.16);
+        border-color: rgba(176, 106, 91, 0.45);
+        color: var(--terracotta);
     }
 
     /* ===== Inline manage panel ===== */
@@ -160,8 +163,8 @@
         margin-top: 10px;
     }
     .manage-panel-inner {
-        background: rgba(10, 3, 60, 0.45);
-        border: 1px solid rgba(42, 247, 255, 0.15);
+        background: rgba(255, 255, 255, 0.55);
+        border: 1px solid rgba(142, 119, 102, 0.25);
         border-radius: var(--radius-md);
         padding: 14px;
     }
@@ -180,8 +183,8 @@
         border: none;
         padding: 0 16px;
         font-weight: 600;
-        background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
-        color: white;
+        background: var(--accent);
+        color: var(--wordmark);
     }
 
     .manage-list {
@@ -193,29 +196,28 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        background: rgba(255,255,255,0.04);
+        background: rgba(255, 255, 255, 0.5);
         border-radius: 8px;
         padding: 6px 10px;
         font-size: 0.9rem;
-        color: var(--text-bright);
+        color: var(--text-main);
     }
     .manage-list-item form { margin: 0; }
     .manage-list-item .mini-delete {
-        background: rgba(255, 80, 80, 0.7);
+        background: var(--terracotta);
         border: none;
         border-radius: 6px;
-        color: white;
+        color: var(--wordmark);
         font-size: 12px;
         padding: 3px 8px;
         cursor: pointer;
         transition: background 0.15s ease;
     }
     .manage-list-item .mini-delete:hover {
-        background: rgba(255, 80, 80, 1);
+        background: #9E5546;
     }
     .manage-empty {
-        color: var(--text-soft);
-        opacity: 0.6;
+        color: var(--text-muted2);
         font-size: 0.85rem;
         padding: 4px 2px;
     }
