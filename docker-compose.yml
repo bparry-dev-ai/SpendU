@@ -1,0 +1,17 @@
+services:
+  spendu:
+    build: .
+    container_name: spendu
+    volumes:
+      - /opt/docker/SpendU/data/spending.db:/app/spending.db
+    environment:
+      TZ: Europe/London
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true
