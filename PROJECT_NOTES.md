@@ -16,7 +16,8 @@ redirected to `/login`.
   registration page:
   ```
   flask create-user            # local
-  docker compose exec <service> flask create-user   # on the server
+  docker compose exec <service> flask create-user   
+      # under /opt/docker/SpendU/on the server
   ```
   It prompts for a username and a password (minimum 8 characters). Running it
   again with the same username resets that user's password — this is the
