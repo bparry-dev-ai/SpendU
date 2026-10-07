@@ -3,8 +3,7 @@
     -SSH into Ubuntu Server
     -navigate to folder /opt/spendu/SpendU 
     -git pull origin main
-    -docker compose build
-    -docker compose up -d 
+    -docker compose up -d --build
     -docker compose logs -f (check logs after redeployment) (errors will show)
     -docker compose ps (checks if container is running)
 
