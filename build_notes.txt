@@ -1,12 +1,38 @@
-## Rebuild Commands
--After editing code and pushing to github
-    -SSH into Ubuntu Server
-    -navigate to folder /opt/spendu/SpendU 
-    -git pull origin main
-    -docker compose up -d --build
-    -docker compose logs -f (check logs after redeployment) (errors will show)
-    -docker compose ps (checks if container is running)
+## Normal rebuild (after pushing changes to GitHub)
+-SSH into Ubuntu Server
+-navigate to folder /opt/spendu/SpendU
+-git pull origin main
+-docker compose up -d --build
+-docker compose logs -f   (check logs after redeployment) (errors will show)
+-docker compose ps        (checks if container is running)
+
+## FIRST deploy of v2 (one time only)
+v2 changes how the database is mounted (the whole data folder instead of
+just the file) and upgrades the database automatically on first start.
+1. On the PC: merge the v2-revamp branch into main and push.
+2. SSH to the server:
+     cd /opt/spendu/SpendU
+     git pull origin main
+3. Make sure the .env file in /opt/spendu/SpendU still has SECRET_KEY
+   (same as v1.2 — nothing new is required).
+4. Extra safety copy (the app also backs up automatically):
+     sudo cp /opt/docker/SpendU/data/spending.db /opt/docker/SpendU/data/spending-before-v2.db
+5. Build and start (the first build takes a few minutes — it builds the
+   React app inside Docker):
+     docker compose up -d --build
+6. Watch the logs until you see "[migrate] database is at version 2":
+     docker compose logs -f
+7. Open the app on your phone and refresh. Then on the Bills page, use
+   "Set due day" on each old bill to put it on the monthly checklist.
+If anything goes wrong: see BACKUPS.md section 3 (restore) — use the
+spending-premigrate-... backup or spending-before-v2.db, and
+git checkout the previous commit.
+
+## Useful commands
+-docker compose exec spendu flask create-user   (add a user / reset a password)
+-docker compose exec spendu flask backup        (take a manual backup now)
+-docker compose exec spendu flask list-backups  (see all backups)
 
 ## Troubleshooting
--added print(dict(request.form), flush=True) inside "if request.method == 'POST':"
-    -prints each request in the docker compose logs while the site is used
+-Errors are printed in docker compose logs (gunicorn shows each request).
+-Backups, log commands and restoring: see BACKUPS.md

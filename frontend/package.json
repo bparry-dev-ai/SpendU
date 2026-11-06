@@ -1,0 +1,24 @@
+{
+  "name": "spendu-frontend",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@simplewebauthn/browser": "10.0.0",
+    "chart.js": "4.4.6",
+    "lucide-react": "0.460.0",
+    "react": "18.3.1",
+    "react-chartjs-2": "5.2.0",
+    "react-dom": "18.3.1",
+    "react-router-dom": "6.30.6"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "4.3.4",
+    "vite": "5.4.21"
+  }
+}

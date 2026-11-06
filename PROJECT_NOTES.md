@@ -1,8 +1,73 @@
 # SpendU — feature and design notes
 
-Written 2026-07-03. Covers the authentication, Face ID, family-profiles, and
-theme work done in the sandbox copy. Everything here is implemented and tested
-but not yet deployed to the server.
+## v2 (2026-11-04): Flask API + React rewrite
+
+**What changed**
+- The Jinja templates are replaced by a React app (`frontend/`). Flask is now
+  a JSON API under `/api/...` (`spendu/`), and it also serves the built React
+  files. The old `templates/` and `static/` folders were removed; they are
+  still in git history.
+- Production runs under **gunicorn** with debug off. Locally, `python app.py`
+  only turns on debug when `FLASK_DEBUG=1` is set.
+- Logins, passkeys and family profiles (§1–3 below) work exactly as before.
+
+**Database: upgraded in place, nothing removed**
+- `spendu/migrations.py` keeps a version number in `PRAGMA user_version`.
+  Migration 1 is the v1.2 schema (a no-op on the live server). Migration 2
+  only **adds** columns and tables:
+  - `spending`: merchant, notes, recurring_id, import_hash, created_at.
+    **Refunds are stored as negative amounts**, so `SUM(amount)` is always
+    net spending.
+  - `bills` (payments): bill_month (which month's bill it pays, backfilled
+    from the date), notes.
+  - `bill_info`: amount, due_day, frequency (monthly/yearly), due_month,
+    card_id (default card), autopay, active, start_month, notes. Old bills
+    have no due_day, so they show under "Finish setting up" until you give
+    them one.
+  - `card_info` / `category_info`: color, archived (plus icon for categories;
+    import_preset/import_mapping for cards).
+  - `users`: timezone.
+  - New tables: `budgets`, `recurring` (subscriptions), `login_attempts`.
+- A backup is taken before migrating, and each migration runs in a
+  transaction. See BACKUPS.md.
+
+**Feature rules worth remembering**
+- A bill counts as paid for a month when a payment with that `bill_month`
+  exists. Bills are shared family-wide; payments show who paid, but never
+  the other person's card.
+- Budgets: personal budgets count your own spending, family budgets count
+  everyone's. Both match categories **by name**, since each person has their
+  own category list, and renaming a category updates your personal budgets.
+  Bills don't count toward budgets.
+- Subscriptions never add spending by themselves. When one is due it stays
+  pending until you Confirm it (which logs it and can update the price) or
+  Skip it.
+- CSV import: presets live in `spendu/api/imports.py` (`PRESETS`). Rows
+  already imported are recognised by a fingerprint (`import_hash`), and
+  manual entries with the same card and amount within ±3 days are flagged
+  as possible duplicates. Card payments and money-in are unticked by
+  default. The Navy Federal and Keesler presets are best guesses; if a real
+  export doesn't map correctly, fix the column names in `PRESETS`.
+- "Today" uses each user's timezone (Settings), falling back to
+  `DEFAULT_TIMEZONE`, so moving back to the US is a one-tap change.
+
+**Security additions**
+- Login rate limit: after 5 failures per username or 20 per IP within 15
+  minutes, further attempts are refused until the window passes. Set
+  `TRUST_PROXY=1` behind a reverse proxy so the real IP is used.
+- "Keep me signed in" lasts 30 days, and is always on for Face ID sign-ins.
+- CSRF: every change-making API request must carry the `X-SpendU: 1` header,
+  which other websites can't add. This is on top of `SameSite=Lax` cookies.
+
+Sections 1–5 below are still accurate. Section 6 (the sage theme) is
+replaced by the v2 design: tokens are at the top of
+`frontend/src/styles.css`, with light and dark modes. For section 8 (local
+development), see README.md.
+
+---
+
+*Notes from 2026-07-03 (v1.2), covering the authentication, Face ID and
+family-profiles work:*
 
 ---
 
@@ -105,7 +170,10 @@ second account.**
 | Variable | Required | Purpose |
 |---|---|---|
 | `SECRET_KEY` | yes — app refuses to start without it | signs session cookies; generate with `python -c "import secrets; print(secrets.token_hex(32))"` |
-| `DB_PATH` | no (defaults to `/app/spending.db`, the docker path) | set to `spending.db` to run locally on Windows |
+| `DB_PATH` | no (v2 default `/app/data/spending.db`; docker-compose sets it) | set to `spending.db` to run locally on Windows |
+| `DEFAULT_TIMEZONE` | no (falls back to `TZ`, then Europe/London) | timezone for users who haven't picked one in Settings |
+| `TRUST_PROXY` | no | `1` behind a reverse proxy, so login rate limiting sees real visitor IPs |
+| `FLASK_DEBUG` | no | `1` locally for auto-reload; never on the server |
 | `RP_ORIGIN` | only behind Cloudflare Tunnel / HTTPS-terminating proxy | the exact origin browsers see, e.g. `https://spendu.example.com` |
 | `RP_ID` | rarely | overrides the passkey domain if auto-detection is wrong |
 
@@ -177,10 +245,7 @@ be tested from a phone locally; everything else can.
 
 ## 9. Known limitations / future ideas
 
-- No rate limiting on the login endpoint. Fine while the app is only
-  reachable through Tailscale; add one (e.g. Flask-Limiter) before ever
-  exposing it publicly via Cloudflare.
-- Session lifetime is "browser session" — closing the browser logs you out.
-  Could add "remember me" via `session.permanent`.
+- ~~No rate limiting on the login endpoint.~~ Added in v2.
+- ~~Session lifetime is "browser session".~~ v2 adds a 30-day "remember me".
 - Bill types are shared; could become per-user like cards/categories.
 - Old transactions can't be reassigned between users from the UI (SQL only).
