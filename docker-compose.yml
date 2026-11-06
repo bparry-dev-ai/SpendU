@@ -3,9 +3,14 @@ services:
     build: .
     container_name: spendu
     volumes:
-      - /opt/docker/SpendU/data/spending.db:/app/spending.db
+      # The whole data folder (not just the .db file) so the automatic
+      # backups in data/backups/ live on the server, not inside the container.
+      - /opt/docker/SpendU/data:/app/data
     environment:
-      TZ: Europe/London
+      TZ: Europe/London                  # server clock; each user also picks their own timezone in Settings
+      DB_PATH: /app/data/spending.db
+      DEFAULT_TIMEZONE: Europe/London    # timezone for users who haven't picked one yet
+      # TRUST_PROXY: "1"                 # uncomment if a reverse proxy sits in front (real visitor IPs for rate limiting)
     restart: unless-stopped
     ports:
       - "5000:5000"

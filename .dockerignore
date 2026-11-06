@@ -1,0 +1,17 @@
+# Keep the image small and never bake a database into it.
+# NOTE: .env is deliberately NOT ignored — on the server SECRET_KEY lives in
+# the project's .env file, which gets copied into the image like before.
+.git
+.claude
+**/node_modules
+frontend/dist
+venv
+env
+__pycache__
+*.pyc
+*.db
+*.db-wal
+*.db-shm
+backup_files
+backups
+instance
