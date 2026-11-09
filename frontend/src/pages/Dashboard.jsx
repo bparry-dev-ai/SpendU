@@ -4,7 +4,7 @@ import { PaceChart } from '../components/charts'
 import PendingSubscriptions from '../components/PendingSubscriptions'
 import TransactionList from '../components/TransactionList'
 import { BillStatus } from './Bills'
-import { BudgetRow } from './Budgets'
+import { LimitRow } from './Planner'
 import { Card, CategoryIcon, Empty, ErrorNote, Money, Progress, Spinner } from '../components/ui'
 import { fmtDate, fmtDateLong, money, monthName } from '../format'
 import { useApp, useFetch } from '../state'
@@ -106,11 +106,11 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        <Card title="Budgets" action={<Link to="/budgets" className="link">Manage</Link>}>
+        <Card title="Budget" action={<Link to="/planner" className="link">Planner</Link>}>
           {data.budgets.length === 0 ? (
-            <Empty title="No budgets yet"><Link to="/budgets" className="link">Create a monthly budget</Link></Empty>
+            <Empty title="No budget plan yet"><Link to="/planner" className="link">Plan your monthly budget</Link></Empty>
           ) : (
-            <div className="stack-sm">{data.budgets.map((b) => <BudgetRow key={b.budget_id} b={b} compact />)}</div>
+            <div className="stack-sm">{data.budgets.map((b) => <LimitRow key={b.line_id} b={b} />)}</div>
           )}
         </Card>
 

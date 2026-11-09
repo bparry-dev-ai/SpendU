@@ -15,3 +15,8 @@ frontend/dist/
 backups/
 *.db-wal
 *.db-shm
+# my private to-do / admin notes (stays on this PC only)
+MY_TODO.md
+WORKFLOW.md
+BACKUPS.md
+GO_LIVE_GUIDE.md

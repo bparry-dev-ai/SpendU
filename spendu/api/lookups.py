@@ -135,10 +135,12 @@ def update_lookup(kind, item_id):
                      (*updates.values(), item_id, uid()))
     except sqlite3.IntegrityError:
         raise ApiError(f"You already have a {cfg['label']} with that name.", 409)
-    # Personal budgets refer to categories by name — keep them in step on rename.
+    # Your personal plan refers to categories by name — keep it in step on rename.
     if kind == "categories" and "name" in updates and updates["name"] != current["name"]:
-        conn.execute("UPDATE budgets SET category_name = ? WHERE user_id = ? AND is_family = 0 AND category_name = ?",
-                     (updates["name"], uid(), current["name"]))
+        conn.execute(
+            """UPDATE plan_lines SET category_name = ? WHERE kind = 'category' AND lower(category_name) = lower(?)
+               AND plan_id = (SELECT plan_id FROM plans WHERE owner_user_id = ?)""",
+            (updates["name"], current["name"], uid()))
     conn.commit()
     return load_meta(conn)
 

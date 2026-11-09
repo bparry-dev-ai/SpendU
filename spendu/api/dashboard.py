@@ -7,7 +7,7 @@ from ..auth import login_required, today, uid
 from ..db import get_db, money, to_dicts
 from ..timeutil import month_bounds, shift_month
 from .bills import build_checklist
-from .budgets import budget_report
+from .planner import limits_for_dashboard
 from .recurring import pending_items
 from .spending import UNIFIED_SQL
 
@@ -64,9 +64,7 @@ def dashboard():
     checklist = build_checklist(conn, now.year, now.month)
     open_bills = [i for i in checklist["items"] if i["status"] != "paid"][:4]
 
-    budgets = budget_report(conn, now.year, now.month)
-    all_budgets = budgets["personal"] + budgets["family"]
-    all_budgets.sort(key=lambda b: -b["pct"])
+    limits = limits_for_dashboard(conn)
 
     recent = to_dicts(conn.execute(f"SELECT * FROM ({UNIFIED_SQL}) ORDER BY date DESC, id DESC LIMIT 6",
                                    {"uid": uid()}).fetchall())
@@ -94,6 +92,6 @@ def dashboard():
         "top_categories": top_categories,
         "bills": {"summary": checklist["summary"], "open": open_bills},
         "pending_recurring": pending_items(conn),
-        "budgets": all_budgets[:4],
+        "budgets": limits[:4],
         "recent": recent,
     }

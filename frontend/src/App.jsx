@@ -3,12 +3,12 @@ import Layout from './components/Layout'
 import { Spinner } from './components/ui'
 import Activity from './pages/Activity'
 import Bills from './pages/Bills'
-import Budgets from './pages/Budgets'
 import Dashboard from './pages/Dashboard'
 import Import from './pages/Import'
 import Insights from './pages/Insights'
 import Login from './pages/Login'
 import More from './pages/More'
+import Planner from './pages/Planner'
 import Settings from './pages/Settings'
 import Subscriptions from './pages/Subscriptions'
 import { useApp } from './state'
@@ -29,7 +29,8 @@ export default function App() {
         <Route path="activity" element={<Activity />} />
         <Route path="bills" element={<Bills />} />
         <Route path="insights" element={<Insights />} />
-        <Route path="budgets" element={<Budgets />} />
+        <Route path="planner" element={<Planner />} />
+        <Route path="budgets" element={<Navigate to="/planner" replace />} />
         <Route path="subscriptions" element={<Subscriptions />} />
         <Route path="import" element={<Import />} />
         <Route path="settings" element={<Settings />} />

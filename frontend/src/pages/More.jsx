@@ -6,7 +6,7 @@ import { PageHeader } from '../components/ui'
 
 const DESCRIPTIONS = {
   '/insights': 'Charts by category and card, trends, calendar',
-  '/budgets': 'Monthly limits for you and the family',
+  '/planner': 'Plan your income: needs, wants and savings',
   '/subscriptions': 'Repeating charges to confirm',
   '/import': 'Bring in a bank statement CSV',
   '/settings': 'Cards, categories, timezone, Face ID',

@@ -1,5 +1,29 @@
 # SpendU — feature and design notes
 
+## Budget Planner (2026-11-08) — replaces the Budgets page
+
+- **Page:** `/planner` (`frontend/src/pages/Planner.jsx`). **API:** `/api/planner`
+  (`spendu/api/planner.py`; its docstring explains every rule). `/budgets` redirects here.
+- **Migration 3** adds `plans` (one per person, plus one household plan with
+  `owner_user_id` NULL; holds `income` and an optional `overall_cap`) and
+  `plan_lines` (group needs/wants/savings; kind category/bill/subscription/custom).
+  Old `budgets` rows are copied in: personal → your plan, family → household,
+  "All spending" → `overall_cap`. The `budgets` table itself is left untouched.
+- **Tracking:** category lines match spending by category **name** (household = everyone's);
+  bill lines use payments by `bill_month`; subscription lines use confirmed charges.
+  Charges from a subscription that has its own line are excluded from category lines,
+  so nothing counts twice. Custom (savings) lines are planned only.
+- **Auto lines:** every active bill goes into the household plan. Your personal plan
+  gets bills set to your card or last paid by you, plus your active subscriptions.
+  Removing an auto line only hides it (`hidden = 1`). Bill/sub lines with `amount`
+  NULL follow the usual amount (yearly bills ÷ 12).
+- **Live:** everything is recalculated on each request, and the page refetches after any
+  change, so a new transaction or bill payment shows up straight away.
+- **History** = average of the last N complete months (1/3/6/12, default 3), or fewer
+  if there isn't that much history yet.
+- **Home's "Budget" card** lists category lines (and overall caps) from both plans as
+  monthly limits, worst first.
+
 ## v2 (2026-11-04): Flask API + React rewrite
 
 **What changed**

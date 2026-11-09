@@ -1,5 +1,5 @@
 import {
-  CalendarClock, ChartPie, FileUp, Home, LayoutGrid, ListOrdered, Plus, Receipt, Repeat, Settings, Target,
+  CalendarClock, ChartPie, FileUp, Home, LayoutGrid, ListOrdered, Plus, Receipt, Repeat, Settings, Wallet,
 } from 'lucide-react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useApp } from '../state'
@@ -11,14 +11,14 @@ export const NAV = [
   { to: '/activity', label: 'Activity', icon: ListOrdered },
   { to: '/bills', label: 'Bills', icon: Receipt },
   { to: '/insights', label: 'Insights', icon: ChartPie },
-  { to: '/budgets', label: 'Budgets', icon: Target },
+  { to: '/planner', label: 'Planner', icon: Wallet },
   { to: '/subscriptions', label: 'Subscriptions', icon: Repeat },
   { to: '/import', label: 'Import CSV', icon: FileUp },
   { to: '/settings', label: 'Settings', icon: Settings },
 ]
 
 const MOBILE_TABS = [NAV[0], NAV[1], null, NAV[2], { to: '/more', label: 'More', icon: LayoutGrid }]
-const MORE_PATHS = ['/more', '/insights', '/budgets', '/subscriptions', '/import', '/settings']
+const MORE_PATHS = ['/more', '/insights', '/planner', '/subscriptions', '/import', '/settings']
 
 export function Logo() {
   return (

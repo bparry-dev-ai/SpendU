@@ -2,7 +2,7 @@
 
 
 def register_blueprints(app):
-    from . import analytics, bills, budgets, dashboard, imports, lookups, recurring, spending
+    from . import analytics, bills, dashboard, imports, lookups, planner, recurring, spending
 
-    for module in (lookups, spending, bills, budgets, recurring, dashboard, analytics, imports):
+    for module in (lookups, spending, bills, planner, recurring, dashboard, analytics, imports):
         app.register_blueprint(module.bp)

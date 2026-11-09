@@ -1,4 +1,4 @@
--- SpendU v2 database schema (reference only).
+-- SpendU database schema (reference only).
 -- The real source of truth is spendu/migrations.py, which creates and
 -- upgrades the database automatically when the app starts.
 -- Regenerate this file after adding a migration.
@@ -58,6 +58,29 @@ CREATE TABLE passkeys (
             FOREIGN KEY (user_id) REFERENCES users(user_id)
         );
 
+CREATE TABLE plan_lines (
+            line_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            plan_id INTEGER NOT NULL REFERENCES plans(plan_id),
+            group_name TEXT NOT NULL DEFAULT 'wants',     -- needs / wants / savings
+            kind TEXT NOT NULL,                           -- category / bill / subscription / custom
+            label TEXT,
+            category_name TEXT,
+            bill_id INTEGER REFERENCES bill_info(bill_id),
+            recurring_id INTEGER REFERENCES recurring(recurring_id),
+            amount REAL,                  -- NULL on bill/subscription lines = follow the bill's usual amount
+            hidden INTEGER NOT NULL DEFAULT 0,  -- removed auto lines stay hidden so they don't come back
+            sort_order INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+
+CREATE TABLE plans (
+            plan_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            owner_user_id INTEGER UNIQUE REFERENCES users(user_id),  -- NULL = the household plan
+            income REAL,
+            overall_cap REAL,             -- optional limit on all spending
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+
 CREATE TABLE recurring (
             recurring_id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL REFERENCES users(user_id),
@@ -94,6 +117,8 @@ CREATE INDEX idx_bills_month ON bills(bill_id, bill_month);
 CREATE INDEX idx_bills_user_date ON bills(user_id, date);
 
 CREATE INDEX idx_login_attempts ON login_attempts(attempted_at);
+
+CREATE INDEX idx_plan_lines_plan ON plan_lines(plan_id);
 
 CREATE INDEX idx_spending_import ON spending(import_hash);
 

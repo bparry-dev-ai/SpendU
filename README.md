@@ -20,8 +20,12 @@ and charts. Self-hosted with Docker.
 - **Bills checklist**: set up each bill once (usual amount, due day,
   default card, monthly or yearly). Every month shows Paid, Due soon or
   Overdue, and "Mark paid" logs the payment with everything filled in.
-- **Budgets**: monthly limits per category or overall, personal or
-  family-wide, with an "on pace" marker.
+- **Budget Planner**: enter your monthly income and split it into Needs,
+  Wants and Savings, with a card for each budget area. Each card shows this
+  month's spending and your 3-month average, with suggestions where you're
+  over- or under-spending. Bills and subscriptions are added automatically.
+  There's a personal plan each plus a shared household plan, and category
+  cards double as monthly limits on Home.
 - **Subscriptions**: repeating charges that wait for you to confirm (or
   skip) each one, so price changes are easy to catch.
 - **Insights**: spending by category and card (donut and bar charts), top
@@ -60,41 +64,31 @@ frontend/              React app
   src/styles.css       all styles; colours are tokens at the top
 ```
 
-## Running locally (Windows)
+## Getting started
 
-One-time setup:
+**Full setup guide: [INSTALL.md](INSTALL.md).** It covers installing on a
+server with Docker, HTTPS and Face ID, updating, configuration, running
+locally for development, and troubleshooting.
 
-```bash
-pip install -r requirements.txt
-cd frontend && npm install
-```
-
-`.env` in the project folder (never commit it):
-
-```
-SECRET_KEY=<python -c "import secrets; print(secrets.token_hex(32))">
-DB_PATH=spending.db
-FLASK_DEBUG=1
-```
-
-**Quick run:** build the frontend once, then let Flask serve everything on
-http://localhost:5000:
+Quick version, on a Linux server with Docker and git installed:
 
 ```bash
-cd frontend && npm run build && cd .. && python app.py
+git clone https://github.com/bparry-dev-ai/SpendU.git
+cd SpendU
+echo "SECRET_KEY=$(python3 -c 'import secrets; print(secrets.token_hex(32))')" > .env
+sudo mkdir -p /opt/docker/SpendU/data
+docker network create proxy            # skip if you already have this network
+docker compose up -d --build
+docker compose exec spendu flask create-user
 ```
 
-**While editing the frontend:** run both, then open http://localhost:5173
-(it reloads instantly as you save):
+Then open `http://<server-ip>:5000` and sign in. Check the data folder and the
+timezone in `docker-compose.yml` first (INSTALL.md §2.4).
 
-```bash
-python app.py
-```
-```bash
-cd frontend && npm run dev
-```
+## More documentation
 
-Create a login with `flask create-user`.
-
-Deploying to the server is covered in [build_notes.txt](build_notes.txt);
-design details are in [PROJECT_NOTES.md](PROJECT_NOTES.md).
+| File | What's in it |
+|---|---|
+| [INSTALL.md](INSTALL.md) | Installing, updating, configuring and troubleshooting |
+| [BACKUPS.md](BACKUPS.md) | Automatic backups, restoring, and VM backups with Proxmox |
+| [PROJECT_NOTES.md](PROJECT_NOTES.md) | How the code works and why: database, sign-in, design decisions |

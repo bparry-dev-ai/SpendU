@@ -205,9 +205,68 @@ def migration_2_v2_features(conn):
     conn.execute("CREATE INDEX IF NOT EXISTS idx_login_attempts ON login_attempts(attempted_at)")
 
 
+# ---------------------------------------------------------------------------
+# Migration 3 — Budget Planner (replaces the Budgets page).
+# The old `budgets` table is kept untouched; its rows are copied into plans.
+# ---------------------------------------------------------------------------
+NEEDS_WORDS = ("grocer", "gas", "fuel", "rent", "mortgage", "util", "insur", "medic", "health", "pharm",
+               "transport", "childcare", "electric", "water", "phone", "internet")
+
+
+def guess_group(name):
+    lowered = (name or "").lower()
+    return "needs" if any(w in lowered for w in NEEDS_WORDS) else "wants"
+
+
+def migration_3_budget_planner(conn):
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS plans (
+            plan_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            owner_user_id INTEGER UNIQUE REFERENCES users(user_id),  -- NULL = the household plan
+            income REAL,
+            overall_cap REAL,             -- optional limit on all spending
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        )""")
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS plan_lines (
+            line_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            plan_id INTEGER NOT NULL REFERENCES plans(plan_id),
+            group_name TEXT NOT NULL DEFAULT 'wants',     -- needs / wants / savings
+            kind TEXT NOT NULL,                           -- category / bill / subscription / custom
+            label TEXT,
+            category_name TEXT,
+            bill_id INTEGER REFERENCES bill_info(bill_id),
+            recurring_id INTEGER REFERENCES recurring(recurring_id),
+            amount REAL,                  -- NULL on bill/subscription lines = follow the bill's usual amount
+            hidden INTEGER NOT NULL DEFAULT 0,  -- removed auto lines stay hidden so they don't come back
+            sort_order INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        )""")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_plan_lines_plan ON plan_lines(plan_id)")
+
+    # Copy existing budgets into plans: personal budgets -> that person's
+    # plan, family budgets -> the household plan, "All spending" -> overall cap.
+    def plan_for(owner):
+        row = conn.execute("SELECT plan_id FROM plans WHERE owner_user_id IS ?", (owner,)).fetchone()
+        if row:
+            return row[0]
+        return conn.execute("INSERT INTO plans (owner_user_id) VALUES (?)", (owner,)).lastrowid
+
+    for user_id, is_family, category_name, amount in conn.execute(
+            "SELECT user_id, is_family, category_name, amount FROM budgets ORDER BY budget_id").fetchall():
+        plan_id = plan_for(None if is_family else user_id)
+        if category_name is None:
+            conn.execute("UPDATE plans SET overall_cap = ? WHERE plan_id = ?", (amount, plan_id))
+        else:
+            conn.execute(
+                "INSERT INTO plan_lines (plan_id, group_name, kind, category_name, amount) VALUES (?, ?, 'category', ?, ?)",
+                (plan_id, guess_group(category_name), category_name, amount))
+
+
 MIGRATIONS = [
     (1, migration_1_v12_baseline),
     (2, migration_2_v2_features),
+    (3, migration_3_budget_planner),
 ]
 LATEST_VERSION = MIGRATIONS[-1][0]
 
