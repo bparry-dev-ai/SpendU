@@ -10,16 +10,25 @@ import { useApp } from '../state'
 function rangeFor(preset, today) {
   const month = today.slice(0, 7)
   switch (preset) {
+    case '7_days': return { start: addDays(today, -6), end: today }
     case 'this_month': return { start: `${month}-01`, end: today }
     case 'last_month': {
       const lm = shiftMonth(month, -1)
       return { start: `${lm}-01`, end: addDays(`${month}-01`, -1) }
     }
+    case '30_days': return { start: addDays(today, -29), end: today }
     case '90_days': return { start: addDays(today, -89), end: today }
     case 'this_year': return { start: `${today.slice(0, 4)}-01-01`, end: today }
     default: return { start: '', end: '' }
   }
 }
+
+const TIME_PRESETS = [
+  { value: '7_days', label: 'Last 7 days' },
+  { value: 'this_month', label: 'This month' },
+  { value: '30_days', label: 'Last 30 days' },
+  { value: 'all', label: 'All time' },
+]
 
 export default function Activity() {
   const { meta, today, version } = useApp()
@@ -28,7 +37,7 @@ export default function Activity() {
   const [kind, setKind] = useState('all')
   const [cardId, setCardId] = useState('')
   const [categoryId, setCategoryId] = useState('')
-  const [preset, setPreset] = useState('all')
+  const [preset, setPreset] = useState('7_days')
   const [custom, setCustom] = useState({ start: '', end: '' })
   const [showFilters, setShowFilters] = useState(false)
   const [page, setPage] = useState(1)
@@ -62,7 +71,7 @@ export default function Activity() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterKey, page, version])
 
-  const activeFilterCount = [cardId, categoryId, preset !== 'all' ? preset : ''].filter(Boolean).length
+  const activeFilterCount = [cardId, categoryId, preset !== '7_days' ? preset : ''].filter(Boolean).length
 
   return (
     <div className="page">
@@ -83,6 +92,19 @@ export default function Activity() {
         </button>
       </div>
 
+      <div className="chip-row no-scrollbar">
+        {TIME_PRESETS.map((p) => (
+          <button
+            key={p.value}
+            type="button"
+            className={`pill ${preset === p.value ? 'on' : ''}`}
+            onClick={() => setPreset(p.value)}
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
+
       <Segmented value={kind} onChange={setKind} size="sm" options={[
         { value: 'all', label: 'All' }, { value: 'spending', label: 'Spending' },
         { value: 'refunds', label: 'Refunds' }, { value: 'bills', label: 'Bills' },
@@ -93,11 +115,13 @@ export default function Activity() {
           <label className="field">
             <span className="field-label">Date</span>
             <select className="input" value={preset} onChange={(e) => setPreset(e.target.value)}>
-              <option value="all">All time</option>
+              <option value="7_days">Last 7 days</option>
               <option value="this_month">This month</option>
               <option value="last_month">Last month</option>
+              <option value="30_days">Last 30 days</option>
               <option value="90_days">Last 90 days</option>
               <option value="this_year">This year</option>
+              <option value="all">All time</option>
               <option value="custom">Custom…</option>
             </select>
           </label>
@@ -124,7 +148,7 @@ export default function Activity() {
             </select>
           </label>
           {activeFilterCount > 0 && (
-            <button className="link" onClick={() => { setCardId(''); setCategoryId(''); setPreset('all') }}>Clear filters</button>
+            <button className="link" onClick={() => { setCardId(''); setCategoryId(''); setPreset('7_days') }}>Clear filters</button>
           )}
         </div>
       )}

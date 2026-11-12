@@ -15,7 +15,8 @@ and charts. Self-hosted with Docker.
   to be confirmed.
 - **Quick add**: amount, merchant (autocompletes and remembers the category
   you last used), category, card and date. Handles purchases, refunds and
-  credits, and bill payments.
+  credits, bill payments, and subscription charges (including setting up a
+  new subscription while logging its first charge).
 - **Edit and delete** any transaction, plus notes on any entry.
 - **Bills checklist**: set up each bill once (usual amount, due day,
   default card, monthly or yearly). Every month shows Paid, Due soon or

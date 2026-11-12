@@ -1,0 +1,1856 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SpendU Nova — Cyber-Glass Tactile Prototype</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700;800&display=swap');
+
+    :root {
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      /* SOLARPUNK GLASS (LIGHT THEME) */
+      --body-bg: #f8fafc;
+      --body-text: #0f172a;
+      --topbar-bg: rgba(255, 255, 255, 0.88);
+      --topbar-border: rgba(203, 213, 225, 0.8);
+      --app-shell-bg: rgba(255, 255, 255, 0.92);
+      --app-shell-border: rgba(203, 213, 225, 0.8);
+      --app-shell-shadow: 0 20px 50px -10px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.8);
+
+      --glass-card-bg: rgba(255, 255, 255, 0.75);
+      --glass-card-border: rgba(203, 213, 225, 0.7);
+      --glass-card-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+
+      --hero-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(241, 245, 249, 0.85) 100%);
+      --hero-border: rgba(148, 163, 184, 0.4);
+      --hero-glow: 0 10px 30px -5px rgba(5, 150, 105, 0.12);
+
+      --inner-card-bg: rgba(248, 250, 252, 0.8);
+      --inner-card-border: rgba(226, 232, 240, 0.8);
+
+      --input-bg: #ffffff;
+      --input-border: #cbd5e1;
+      --input-text: #0f172a;
+
+      --text-heading: #0f172a;
+      --text-sub: #475569;
+      --text-muted: #64748b;
+      --text-highlight: #0f172a;
+
+      --bottom-bar-bg: rgba(255, 255, 255, 0.88);
+      --bottom-bar-border: rgba(226, 232, 240, 0.9);
+
+      --track-bg: #e2e8f0;
+      --track-border: #cbd5e1;
+      --track-shadow: inset 0 2px 4px rgba(15, 23, 42, 0.06);
+
+      --badge-green-bg: #dcfce7;
+      --badge-green-text: #15803d;
+      --badge-green-border: #86efac;
+      --accent-green: #059669;
+      --accent-green-glow: none;
+
+      --badge-amber-bg: #fef3c7;
+      --badge-amber-text: #b45309;
+      --badge-amber-border: #fde68a;
+
+      --tag-btn-bg: #f1f5f9;
+      --tag-btn-text: #334155;
+      --tag-btn-hover: #e2e8f0;
+
+      /* Neumorphic Numpad in Light */
+      --neu-key-bg: linear-gradient(145deg, #ffffff, #e2e8f0);
+      --neu-key-shadow: 3px 3px 8px rgba(15, 23, 42, 0.08), -2px -2px 6px #ffffff;
+      --neu-key-active: inset 2px 2px 4px rgba(15, 23, 42, 0.12), inset -1px -1px 3px #ffffff;
+      --neu-key-border: rgba(226, 232, 240, 0.8);
+
+      --ambient-orb-1: rgba(16, 185, 129, 0.12);
+      --ambient-orb-2: rgba(99, 102, 241, 0.10);
+    }
+
+    html.dark {
+      /* CYBER OBSIDIAN GLASS (DARK THEME) */
+      --body-bg: #060814;
+      --body-text: #f8fafc;
+      --topbar-bg: rgba(10, 15, 29, 0.82);
+      --topbar-border: rgba(255, 255, 255, 0.08);
+      --app-shell-bg: rgba(10, 15, 30, 0.85);
+      --app-shell-border: rgba(255, 255, 255, 0.10);
+      --app-shell-shadow: 0 25px 70px -15px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.08);
+
+      --glass-card-bg: rgba(15, 23, 42, 0.65);
+      --glass-card-border: rgba(255, 255, 255, 0.12);
+      --glass-card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+
+      --hero-bg: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.85) 100%);
+      --hero-border: rgba(0, 245, 155, 0.3);
+      --hero-glow: 0 0 35px -5px rgba(0, 245, 155, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+
+      --inner-card-bg: rgba(15, 23, 42, 0.7);
+      --inner-card-border: rgba(255, 255, 255, 0.08);
+
+      --input-bg: rgba(10, 15, 30, 0.8);
+      --input-border: rgba(255, 255, 255, 0.15);
+      --input-text: #f8fafc;
+
+      --text-heading: #f8fafc;
+      --text-sub: #94a3b8;
+      --text-muted: #64748b;
+      --text-highlight: #ffffff;
+
+      --bottom-bar-bg: rgba(10, 15, 29, 0.88);
+      --bottom-bar-border: rgba(255, 255, 255, 0.08);
+
+      --track-bg: #030712;
+      --track-border: rgba(255, 255, 255, 0.08);
+      --track-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.7);
+
+      --badge-green-bg: rgba(0, 245, 155, 0.12);
+      --badge-green-text: #00f59b;
+      --badge-green-border: rgba(0, 245, 155, 0.35);
+      --accent-green: #00f59b;
+      --accent-green-glow: 0 0 12px rgba(0, 245, 155, 0.4);
+
+      --badge-amber-bg: rgba(245, 158, 11, 0.15);
+      --badge-amber-text: #fbbf24;
+      --badge-amber-border: rgba(245, 158, 11, 0.35);
+
+      --tag-btn-bg: rgba(30, 41, 59, 0.6);
+      --tag-btn-text: #cbd5e1;
+      --tag-btn-hover: rgba(51, 65, 85, 0.8);
+
+      /* Neumorphic Numpad in Dark */
+      --neu-key-bg: linear-gradient(145deg, #182234, #0d1522);
+      --neu-key-shadow: 4px 4px 10px rgba(0, 0, 0, 0.45), -2px -2px 6px rgba(255, 255, 255, 0.05);
+      --neu-key-active: inset 2px 2px 5px rgba(0, 0, 0, 0.6), inset -1px -1px 3px rgba(255, 255, 255, 0.08);
+      --neu-key-border: rgba(255, 255, 255, 0.08);
+
+      --ambient-orb-1: rgba(0, 245, 155, 0.15);
+      --ambient-orb-2: rgba(139, 92, 246, 0.14);
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--body-bg);
+      color: var(--body-text);
+      -webkit-font-smoothing: antialiased;
+      user-select: none;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      touch-action: manipulation;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* AMBIENT MESH GRADIENT AURA ORBS */
+    .ambient-aurora {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .orb-1 {
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      top: -100px;
+      right: 15%;
+      background: radial-gradient(circle, var(--ambient-orb-1) 0%, transparent 70%);
+      filter: blur(60px);
+      animation: floatOrb 18s ease-in-out infinite alternate;
+    }
+    .orb-2 {
+      position: absolute;
+      width: 550px;
+      height: 550px;
+      bottom: 5%;
+      left: 10%;
+      background: radial-gradient(circle, var(--ambient-orb-2) 0%, transparent 70%);
+      filter: blur(70px);
+      animation: floatOrb 22s ease-in-out infinite alternate-reverse;
+    }
+    @keyframes floatOrb {
+      0% { transform: translate(0px, 0px) scale(1); }
+      50% { transform: translate(40px, -30px) scale(1.08); }
+      100% { transform: translate(-30px, 40px) scale(0.95); }
+    }
+
+    .num {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.03em;
+    }
+
+    /* GLASSMORPHISM UTILITIES */
+    .glass-surface {
+      background: var(--glass-card-bg);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid var(--glass-card-border);
+      box-shadow: var(--glass-card-shadow);
+    }
+    .glass-nav {
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+    }
+
+    /* THEME HOOKS */
+    .app-shell { 
+      background: var(--app-shell-bg); 
+      border: 1px solid var(--app-shell-border); 
+      box-shadow: var(--app-shell-shadow); 
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+    }
+    .app-card { 
+      background: var(--glass-card-bg); 
+      border: 1px solid var(--glass-card-border); 
+      box-shadow: var(--glass-card-shadow); 
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+    .app-hero-card { 
+      background: var(--hero-bg); 
+      border: 1px solid var(--hero-border); 
+      box-shadow: var(--hero-glow); 
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+    }
+    .app-inner-card { 
+      background: var(--inner-card-bg); 
+      border: 1px solid var(--inner-card-border); 
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .app-input { background: var(--input-bg); border-color: var(--input-border); color: var(--input-text); }
+    .app-bottom-bar { background: var(--bottom-bar-bg); border-color: var(--bottom-bar-border); }
+    .app-top-header { background: var(--topbar-bg); border-color: var(--topbar-border); }
+    .app-heading { color: var(--text-heading); }
+    .app-sub { color: var(--text-sub); }
+    .app-hl { color: var(--text-highlight); }
+    .app-track { 
+      background: var(--track-bg); 
+      border-color: var(--track-border); 
+      box-shadow: var(--track-shadow);
+    }
+    .badge-green { background: var(--badge-green-bg); color: var(--badge-green-text); border-color: var(--badge-green-border); }
+    .badge-amber { background: var(--badge-amber-bg); color: var(--badge-amber-text); border-color: var(--badge-amber-border); }
+    .color-green { 
+      color: var(--accent-green); 
+      text-shadow: var(--accent-green-glow);
+    }
+    .tag-btn { background: var(--tag-btn-bg); color: var(--tag-btn-text); }
+    .tag-btn:hover { background: var(--tag-btn-hover); }
+
+    /* NEUMORPHIC TACTILE NUMPAD KEYS */
+    .neu-key {
+      background: var(--neu-key-bg);
+      box-shadow: var(--neu-key-shadow);
+      border: 1px solid var(--neu-key-border);
+      transition: all 0.08s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+    .neu-key:active {
+      box-shadow: var(--neu-key-active) !important;
+      transform: translateY(1.5px) scale(0.98);
+    }
+
+    /* MOTION & BUTTONLESS INTERACTIVE STYLES */
+    .motion-pressable {
+      transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease;
+      cursor: pointer;
+    }
+    .motion-pressable:active {
+      transform: scale(0.96);
+    }
+
+    /* CELEBRATORY DOPAMINE RIPPLE FOR BILLS */
+    @keyframes successGlow {
+      0% { box-shadow: 0 0 0 0 rgba(0, 245, 155, 0.6); }
+      70% { box-shadow: 0 0 0 14px rgba(0, 245, 155, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(0, 245, 155, 0); }
+    }
+    .ripple-success {
+      animation: successGlow 0.75s ease-out;
+    }
+
+    /* RETRO-CYBERPUNK ACCENTS */
+    .cyber-pulse {
+      animation: cyberGlowPulse 3s ease-in-out infinite;
+    }
+    @keyframes cyberGlowPulse {
+      0%, 100% { opacity: 0.85; filter: drop-shadow(0 0 6px rgba(0, 245, 155, 0.3)); }
+      50% { opacity: 1; filter: drop-shadow(0 0 12px rgba(0, 245, 155, 0.6)); }
+    }
+
+    /* CUSTOM SLEEK SCROLLBAR */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 9999px; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-start p-2 sm:p-6">
+
+  <!-- AMBIENT AURORA MESH BACKGROUND -->
+  <div class="ambient-aurora">
+    <div class="orb-1"></div>
+    <div class="orb-2"></div>
+  </div>
+
+  <!-- TOP PROTOTYPE TOOLBAR -->
+  <header class="w-full max-w-5xl mb-4 app-top-header border rounded-2xl p-3 px-4 flex flex-wrap items-center justify-between gap-3 shadow-lg glass-nav z-10 transition-colors duration-200">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 via-indigo-600 to-violet-600 flex items-center justify-center font-black text-white text-lg shadow-lg shadow-indigo-500/30">
+        ⚡
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="font-extrabold text-base tracking-tight app-heading">SpendU Nova</span>
+          <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-500 dark:text-cyan-400 border border-cyan-500/30 flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span>
+            Cyber-Glass Tactile
+          </span>
+        </div>
+        <p class="text-xs app-sub hidden sm:block">Neumorphic Numpad · Glassmorphic Glow · Emotional Telemetry · Motion Springs</p>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="flex items-center gap-2 flex-wrap">
+      <!-- Device Viewport Toggle -->
+      <div class="p-1 rounded-xl border border-slate-300 dark:border-slate-800 bg-slate-200/60 dark:bg-slate-950/70 flex items-center gap-1">
+        <button id="btn-device-mobile" onclick="setDeviceView('mobile')" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-600 text-white flex items-center gap-1.5 transition">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect width="14" height="20" x="5" y="2" rx="2" stroke-width="2"/><path stroke-width="2" d="M12 18h.01"/></svg>
+          Phone Frame
+        </button>
+        <button id="btn-device-fluid" onclick="setDeviceView('fluid')" class="px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-white flex items-center gap-1.5 transition">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="3" rx="2" stroke-width="2"/><path stroke-width="2" d="M8 21h8m-4-4v4"/></svg>
+          Fluid Desktop
+        </button>
+      </div>
+
+      <!-- Theme Switcher: Solarpunk vs Cyber-Obsidian -->
+      <button onclick="toggleTheme()" class="px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold flex items-center gap-1.5 shadow-sm transition motion-pressable" title="Toggle Solarpunk or Cyber-Obsidian Theme">
+        <svg id="theme-icon-sun" class="w-4 h-4 text-amber-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" stroke-width="2"/><path stroke-width="2" d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <svg id="theme-icon-moon" class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <span id="theme-text">Cyber Obsidian</span>
+      </button>
+
+      <!-- 1-Tap PWA Guide Modal Trigger -->
+      <button onclick="openModal('pwa-modal')" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:opacity-90 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-emerald-500/20 transition motion-pressable">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 4v12m0 0l-4-4m4 4l4-4M4 18h16"/></svg>
+        1-Tap Setup
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN APP CONTAINER (FROSTED GLASS SHELL) -->
+  <main id="app-container" class="w-full max-w-[430px] min-h-[850px] app-shell rounded-[44px] overflow-hidden relative flex flex-col z-10 transition-all duration-200">
+
+    <!-- PHONE STATUS BAR SIMULATION -->
+    <div id="phone-notch" class="pt-3 px-6 flex justify-between items-center text-xs font-semibold app-sub select-none">
+      <span id="live-time" class="tracking-tight font-mono text-[11px]">9:41</span>
+      <div class="w-24 h-4 bg-slate-900 dark:bg-slate-950 rounded-full mx-auto shadow-inner"></div>
+      <div class="flex items-center gap-1.5 text-[11px]">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="font-mono">5G</span>
+        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M17 4h-3V2h-4v2H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/></svg>
+      </div>
+    </div>
+
+    <!-- UNIFIED RETRO-CYBERPUNK GRAPHIC APP HEADER (PERSISTENT ON ALL PAGES) -->
+    <header class="relative mx-4 mt-2.5 mb-1 rounded-3xl overflow-hidden border border-slate-200 dark:border-cyan-500/30 shadow-lg bg-slate-950 select-none">
+      
+      <!-- Specular Top Hairline -->
+      <div class="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent z-10"></div>
+
+      <!-- Static Retro-Cyberpunk Synthwave Artwork Container (Zero Distracting Movement) -->
+      <div class="relative w-full h-24 overflow-hidden flex items-center justify-center">
+        <svg class="w-full h-full" viewBox="0 0 400 95" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="hdrSunGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ff007f" />
+              <stop offset="50%" stop-color="#ff007f" />
+              <stop offset="100%" stop-color="#ffb703" />
+            </linearGradient>
+            <linearGradient id="hdrGridGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#00f59b" stop-opacity="0.15" />
+              <stop offset="50%" stop-color="#00e5ff" stop-opacity="0.45" />
+              <stop offset="100%" stop-color="#00e5ff" stop-opacity="0.85" />
+            </linearGradient>
+            <linearGradient id="hdrMtn1" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#1e1b4b" stop-opacity="0.9" />
+              <stop offset="100%" stop-color="#090d16" stop-opacity="0.95" />
+            </linearGradient>
+            <linearGradient id="hdrMtn2" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#311042" stop-opacity="0.9" />
+              <stop offset="100%" stop-color="#090d16" stop-opacity="0.95" />
+            </linearGradient>
+            <linearGradient id="hdrLaser" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="transparent" />
+              <stop offset="25%" stop-color="#ff007f" />
+              <stop offset="50%" stop-color="#00f59b" />
+              <stop offset="75%" stop-color="#00e5ff" />
+              <stop offset="100%" stop-color="transparent" />
+            </linearGradient>
+          </defs>
+
+          <!-- Starfield -->
+          <circle cx="30" cy="14" r="0.9" fill="#fff" opacity="0.7" />
+          <circle cx="80" cy="10" r="1.2" fill="#00e5ff" opacity="0.8" />
+          <circle cx="140" cy="18" r="0.8" fill="#fff" opacity="0.5" />
+          <circle cx="270" cy="12" r="1.1" fill="#fff" opacity="0.7" />
+          <circle cx="330" cy="20" r="1.3" fill="#ff007f" opacity="0.85" />
+          <circle cx="380" cy="12" r="0.8" fill="#fff" opacity="0.6" />
+
+          <!-- Sliced Static Retro Synthwave Sun -->
+          <path d="M 182 18 A 22 22 0 0 1 218 18 Z" fill="url(#hdrSunGrad)" />
+          <path d="M 179 23 H 221 A 22 22 0 0 1 222.5 27 H 177.5 A 22 22 0 0 1 179 23 Z" fill="url(#hdrSunGrad)" />
+          <path d="M 178 31 H 222 A 22 22 0 0 1 222.5 36 H 177.5 A 22 22 0 0 1 178 31 Z" fill="url(#hdrSunGrad)" />
+          <path d="M 178 40 H 222 A 22 22 0 0 1 221 47 H 179 A 22 22 0 0 1 178 40 Z" fill="url(#hdrSunGrad)" />
+
+          <!-- Low-Poly Wireframe Mountains -->
+          <polygon points="0,48 45,24 95,40 145,20 195,48" fill="url(#hdrMtn1)" />
+          <polyline points="0,48 45,24 95,40 145,20 195,48" stroke="#8b5cf6" stroke-width="1.2" opacity="0.75" />
+
+          <polygon points="205,48 255,22 305,40 355,24 400,48" fill="url(#hdrMtn2)" />
+          <polyline points="205,48 255,22 305,40 355,24 400,48" stroke="#ec4899" stroke-width="1.2" opacity="0.75" />
+
+          <!-- Horizon Laser Beam -->
+          <line x1="0" y1="48" x2="400" y2="48" stroke="url(#hdrLaser)" stroke-width="2" />
+
+          <!-- Perspective Grid Floor -->
+          <g stroke="url(#hdrGridGrad)" stroke-width="1.1" opacity="0.8">
+            <line x1="200" y1="48" x2="-25" y2="95" />
+            <line x1="200" y1="48" x2="20" y2="95" />
+            <line x1="200" y1="48" x2="65" y2="95" />
+            <line x1="200" y1="48" x2="110" y2="95" />
+            <line x1="200" y1="48" x2="155" y2="95" />
+            <line x1="200" y1="48" x2="200" y2="95" stroke="#00f59b" stroke-width="1.8" />
+            <line x1="200" y1="48" x2="245" y2="95" />
+            <line x1="200" y1="48" x2="290" y2="95" />
+            <line x1="200" y1="48" x2="335" y2="95" />
+            <line x1="200" y1="48" x2="380" y2="95" />
+            <line x1="200" y1="48" x2="425" y2="95" />
+
+            <line x1="0" y1="51" x2="400" y2="51" opacity="0.3" />
+            <line x1="0" y1="56" x2="400" y2="56" opacity="0.45" />
+            <line x1="0" y1="64" x2="400" y2="64" opacity="0.6" />
+            <line x1="0" y1="76" x2="400" y2="76" opacity="0.8" />
+            <line x1="0" y1="91" x2="400" y2="91" stroke-width="1.5" opacity="0.95" />
+          </g>
+        </svg>
+
+        <!-- Darkened Gradient Vignette for Razor-Sharp Text Readability -->
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/45 to-slate-950/70 pointer-events-none"></div>
+
+        <!-- RELEVANT HEADER CONTENT (ZERO JARGON) -->
+        <div class="absolute inset-0 p-3.5 flex items-center justify-between z-10">
+          <div>
+            <div class="text-xs font-black tracking-wider uppercase text-white font-mono flex items-center gap-1.5">
+              <span class="text-pink-500 font-black">SPENDU</span>
+              <span class="text-slate-400">/</span>
+              <span id="app-header-page" class="text-cyan-400 font-black">HOME</span>
+            </div>
+            <div id="app-header-sub" class="text-xs text-slate-200 font-medium tracking-tight mt-0.5">
+              Good morning, Brandon
+            </div>
+          </div>
+
+          <!-- REAL DATE & TIME (NO JARGON) -->
+          <div class="text-right">
+            <div class="text-[11px] font-bold text-slate-200 font-mono tracking-tight">
+              Wed, Nov 11, 2026
+            </div>
+            <div class="text-xs font-black text-cyan-300 font-mono tracking-wider">
+              9:41 AM
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- TAB 1: HOME VIEW (FINANCIAL FLIGHT DECK) -->
+    <div id="view-home" class="flex-1 overflow-y-auto px-4 pb-28 space-y-3.5 pt-2">
+
+      <!-- HERO: WEEKLY SAFE-TO-SPEND (CYBER-GLASS AURA HUD) -->
+      <section class="app-hero-card rounded-3xl p-5 relative overflow-hidden transition-all shadow-lg">
+        
+        <!-- Specular Glass Accent Line -->
+        <div class="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent"></div>
+
+        <div class="flex justify-between items-start mb-2">
+          <div>
+            <span class="text-[11px] font-black uppercase tracking-wider color-green flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              Weekly Safe to Spend
+            </span>
+            <div id="hero-weekly-val" class="text-3xl sm:text-4xl font-black app-heading tracking-tight mt-1 num">
+              $320.00 <span class="text-sm font-semibold app-sub font-sans">/ this week</span>
+            </div>
+          </div>
+          <span class="text-[10px] font-bold px-2.5 py-1 rounded-full badge-green border flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+            Optimal Pace
+          </span>
+        </div>
+
+        <!-- EMOTIONAL DESIGN: PEACE-OF-MIND MICRO-COPY -->
+        <div class="p-2.5 rounded-2xl app-inner-card border mb-3.5 flex items-center gap-2">
+          <span class="text-base">✨</span>
+          <p class="text-[11px] app-heading font-medium leading-tight">
+            <strong>Mindset: Clear & Protected.</strong> You have <span class="num font-bold color-green">$320.00</span> clear for guilt-free spending through Sunday.
+          </p>
+        </div>
+
+        <p class="text-xs app-sub mb-3">
+          Resets Monday. Remaining for month: <span class="font-bold app-hl num">$1,280.00</span>
+        </p>
+
+        <!-- RECESSED NEUMORPHIC ENERGY TRACK (MONTHLY TARGET & PACE) -->
+        <div class="space-y-1.5 pt-2 border-t border-slate-200 dark:border-slate-700/60">
+          <div class="flex justify-between text-xs app-sub font-medium">
+            <span>Spent in Nov: <strong class="app-hl num">$1,420.50</strong></span>
+            <span>Monthly Target: <span class="num font-semibold app-heading">$3,200.00</span></span>
+          </div>
+
+          <!-- Recessed Track -->
+          <div class="w-full h-3 app-track rounded-full overflow-hidden p-0.5 border flex">
+            <div class="h-full bg-gradient-to-r from-cyan-400 via-indigo-500 to-emerald-400 rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(0,245,155,0.4)]" style="width: 44.3%"></div>
+          </div>
+
+          <div class="flex justify-between text-[11px] app-sub num">
+            <span>DAY 11 / 30 (36% ELAPSED)</span>
+            <span class="color-green font-bold">8% UNDER CEILING 🛡️</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- CATEGORY-SPECIFIC WEEKLY BREAKDOWN (FROSTED GLASS TILES) -->
+      <section class="app-card rounded-3xl p-4 space-y-3">
+        <div class="flex justify-between items-center">
+          <div>
+            <h2 class="text-xs font-bold uppercase tracking-wider app-sub">Category Safe to Spend</h2>
+            <p class="text-[11px] app-sub">Live weekly allowances driven by your Planner</p>
+          </div>
+          <button onclick="switchTab('planner')" class="text-xs font-bold text-cyan-600 dark:text-cyan-400 hover:underline flex items-center gap-1 motion-pressable">
+            Edit Plan →
+          </button>
+        </div>
+
+        <div id="home-category-safe-list" class="space-y-2.5">
+          <!-- Groceries -->
+          <div class="app-inner-card p-3 rounded-2xl border flex items-center justify-between motion-pressable" onclick="switchTab('planner')">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg">
+                🛒
+              </div>
+              <div>
+                <div class="text-xs font-bold app-heading">Groceries & Home</div>
+                <div class="text-[11px] app-sub num">$410 left this month</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-xs font-black color-green num">$135.00 <span class="text-[10px] app-sub font-normal">/wk</span></div>
+              <div class="text-[10px] app-sub num">$45 spent this wk</div>
+            </div>
+          </div>
+
+          <!-- Dining -->
+          <div class="app-inner-card p-3 rounded-2xl border flex items-center justify-between motion-pressable" onclick="switchTab('planner')">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-indigo-500/15 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-lg">
+                🍕
+              </div>
+              <div>
+                <div class="text-xs font-bold app-heading">Dining & Coffee</div>
+                <div class="text-[11px] app-sub num">$135 left this month</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-xs font-black color-green num">$45.00 <span class="text-[10px] app-sub font-normal">/wk</span></div>
+              <div class="text-[10px] app-sub num">$18 spent this wk</div>
+            </div>
+          </div>
+
+          <!-- Gas / Transport -->
+          <div class="app-inner-card p-3 rounded-2xl border flex items-center justify-between motion-pressable" onclick="switchTab('planner')">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/20 text-amber-400 flex items-center justify-center text-lg">
+                ⛽
+              </div>
+              <div>
+                <div class="text-xs font-bold app-heading">Gas & Fuel</div>
+                <div class="text-[11px] app-sub num">$90 left this month</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-xs font-black color-green num">$30.00 <span class="text-[10px] app-sub font-normal">/wk</span></div>
+              <div class="text-[10px] app-sub num">$0 spent this wk</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- UPCOMING BILLS HORIZON (ONE-TAP DOPAMINE RIPPLE) -->
+      <section class="space-y-2">
+        <div class="flex justify-between items-center px-1">
+          <h2 class="text-xs font-bold uppercase tracking-wider app-sub">Due in Next 7 Days</h2>
+          <button onclick="switchTab('recurring')" class="text-xs font-bold text-cyan-600 dark:text-cyan-400 hover:underline">All Obligations →</button>
+        </div>
+
+        <div class="flex gap-3 overflow-x-auto pb-1 -mx-4 px-4 no-scrollbar">
+          <!-- Bill Card 1 -->
+          <div class="min-w-[175px] app-card rounded-2xl p-3.5 flex flex-col justify-between relative group">
+            <div class="flex items-center justify-between mb-2">
+              <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-500 flex items-center justify-center font-bold text-sm shadow-inner">
+                ⚡
+              </div>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full badge-amber border num">
+                IN 2 DAYS
+              </span>
+            </div>
+            <div>
+              <div class="text-xs font-bold app-heading truncate">Electric (Duke)</div>
+              <div class="text-sm font-extrabold app-heading mt-0.5 num">$124.50</div>
+            </div>
+            <!-- One-tap buttonless confirmation pill -->
+            <button onclick="markBillPaidWithRipple(this, 'Electric (Duke)', 124.50)" class="mt-3 w-full py-1.5 rounded-xl border border-slate-300 dark:border-slate-700/80 bg-slate-100 dark:bg-slate-800/80 hover:bg-emerald-500 hover:text-white app-heading text-xs font-bold transition-all motion-pressable flex items-center justify-center gap-1">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+              Mark Settled
+            </button>
+          </div>
+
+          <!-- Bill Card 2 -->
+          <div class="min-w-[175px] app-card rounded-2xl p-3.5 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+              <div class="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-sm shadow-inner">
+                🌐
+              </div>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 num">
+                NOV 15
+              </span>
+            </div>
+            <div>
+              <div class="text-xs font-bold app-heading truncate">Fiber Internet</div>
+              <div class="text-sm font-extrabold app-heading mt-0.5 num">$70.00</div>
+            </div>
+            <button onclick="markBillPaidWithRipple(this, 'Fiber Internet', 70.00)" class="mt-3 w-full py-1.5 rounded-xl border border-slate-300 dark:border-slate-700/80 bg-slate-100 dark:bg-slate-800/80 hover:bg-emerald-500 hover:text-white app-heading text-xs font-bold transition-all motion-pressable flex items-center justify-center gap-1">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+              Mark Settled
+            </button>
+          </div>
+
+          <!-- Sub Card 3 -->
+          <div class="min-w-[175px] app-card rounded-2xl p-3.5 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+              <div class="w-8 h-8 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center font-bold text-sm shadow-inner">
+                🍿
+              </div>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-400 border border-rose-500/25 num">
+                AUTOPAY
+              </span>
+            </div>
+            <div>
+              <div class="text-xs font-bold app-heading truncate">Netflix 4K</div>
+              <div class="text-sm font-extrabold app-heading mt-0.5 num">$22.99</div>
+            </div>
+            <button onclick="confirmSubWithRipple(this, 'Netflix 4K', 22.99)" class="mt-3 w-full py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs font-bold transition shadow-sm motion-pressable flex items-center justify-center gap-1">
+              Confirm $22.99
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- RECENT ACTIVITY HUD FEED -->
+      <section class="space-y-2">
+        <div class="flex justify-between items-center px-1">
+          <h2 class="text-xs font-bold uppercase tracking-wider app-sub">Recent Activity</h2>
+          <button onclick="switchTab('activity')" class="text-xs font-bold text-cyan-600 dark:text-cyan-400 hover:underline">Full Feed →</button>
+        </div>
+
+        <div id="home-tx-list" class="space-y-2">
+          <!-- Rendered dynamically -->
+        </div>
+      </section>
+
+    </div>
+
+    <!-- TAB 2: ACTIVITY VIEW (SCROLLYTELLING & MULTI-FILTER HUB) -->
+    <div id="view-activity" class="flex-1 overflow-y-auto px-4 pb-28 space-y-3 pt-3 hidden">
+      <!-- Search Input -->
+      <div class="relative">
+        <input id="activity-search" oninput="applyFilters()" type="text" placeholder="Search merchant, notes, tags..." class="w-full app-input border rounded-2xl pl-10 pr-4 py-2.5 text-xs placeholder-slate-400 focus:outline-none focus:border-cyan-500">
+        <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" stroke-width="2"/><path stroke-width="2" d="M21 21l-4.35-4.35"/></svg>
+      </div>
+
+      <!-- MULTI-DIMENSIONAL FILTER HUB -->
+      <div class="app-card rounded-2xl p-3.5 space-y-2.5">
+        <div class="flex items-center justify-between text-xs font-bold app-heading">
+          <span class="flex items-center gap-1.5">
+            <span class="text-cyan-400">⚡</span>
+            Telemetry Filters
+          </span>
+          <span id="activity-filter-summary" class="text-[11px] font-bold text-cyan-500 dark:text-cyan-400 num">LAST 7 DAYS (DEFAULT)</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <!-- Date Range -->
+          <div>
+            <label class="text-[10px] app-sub font-bold block mb-1">Time Horizon</label>
+            <select id="filter-date" onchange="applyFilters()" class="w-full app-input border rounded-xl px-2.5 py-1.5 text-xs focus:outline-none">
+              <option value="7days" selected>Last 7 Days (Default)</option>
+              <option value="this_month">This Month</option>
+              <option value="30days">Last 30 Days</option>
+              <option value="all">All Records</option>
+            </select>
+          </div>
+
+          <!-- Card -->
+          <div>
+            <label class="text-[10px] app-sub font-bold block mb-1">Payment Method</label>
+            <select id="filter-card" onchange="applyFilters()" class="w-full app-input border rounded-xl px-2.5 py-1.5 text-xs focus:outline-none">
+              <option value="all" selected>All Cards & Accounts</option>
+              <option value="Apple Card">Apple Card</option>
+              <option value="Navy Federal">Navy Federal</option>
+              <option value="Amex">Amex</option>
+            </select>
+          </div>
+
+          <!-- Category -->
+          <div>
+            <label class="text-[10px] app-sub font-bold block mb-1">Category</label>
+            <select id="filter-cat" onchange="applyFilters()" class="w-full app-input border rounded-xl px-2.5 py-1.5 text-xs focus:outline-none">
+              <option value="all" selected>All Categories</option>
+              <option value="Groceries">Groceries</option>
+              <option value="Dining">Dining</option>
+              <option value="Gas & Fuel">Gas & Fuel</option>
+              <option value="Shopping">Shopping</option>
+              <option value="Bills">Bills & Utilities</option>
+            </select>
+          </div>
+
+          <!-- Type -->
+          <div>
+            <label class="text-[10px] app-sub font-bold block mb-1">Flow Type</label>
+            <select id="filter-type" onchange="applyFilters()" class="w-full app-input border rounded-xl px-2.5 py-1.5 text-xs focus:outline-none">
+              <option value="all" selected>All Flows</option>
+              <option value="purchase">Outflow (-)</option>
+              <option value="refund">Inflow (+)</option>
+              <option value="bill">Recurring Bills</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scrollytelling Live Count Pill -->
+      <div class="flex justify-between items-center text-xs app-sub px-1 pt-1 num">
+        <span id="tx-count-display">SHOWING 6 TRANSACTIONS</span>
+        <span id="tx-total-display" class="font-extrabold color-green text-xs">TOTAL: $234.19</span>
+      </div>
+
+      <!-- Transaction Feed with Chronological Scrollytelling Chapters -->
+      <div id="activity-feed" class="space-y-3">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+    <!-- TAB 3: RECURRING HUB (BILLS & SUBSCRIPTIONS) -->
+    <div id="view-recurring" class="flex-1 overflow-y-auto px-4 pb-28 space-y-4 pt-3 hidden">
+      <!-- Obligations Header Card -->
+      <div class="app-card rounded-3xl p-4 flex items-center justify-between">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider app-sub num">Monthly Obligations Horizon</span>
+          <div class="text-2xl font-black app-heading num mt-0.5" id="recurring-remaining-amt">$399.00 <span class="text-xs app-sub font-normal">due</span></div>
+          <span class="text-[11px] color-green font-bold" id="recurring-status-line">3 of 7 items settled ($239.50 paid)</span>
+        </div>
+        <button onclick="openModal('add-recurring-modal')" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-600 hover:opacity-90 text-white font-extrabold text-xs flex items-center gap-1 shadow-md shadow-indigo-600/30 motion-pressable">
+          + Add Item
+        </button>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="flex gap-1.5 border-b border-slate-200 dark:border-slate-800 pb-2 text-xs font-bold">
+        <button id="rf-all" onclick="filterRecurring('all')" class="px-3 py-1 rounded-full bg-indigo-600 text-white motion-pressable">All (7)</button>
+        <button id="rf-bills" onclick="filterRecurring('bill')" class="px-3 py-1 rounded-full tag-btn motion-pressable">Bills (4)</button>
+        <button id="rf-subs" onclick="filterRecurring('sub')" class="px-3 py-1 rounded-full tag-btn motion-pressable">Subscriptions (3)</button>
+        <button id="rf-unpaid" onclick="filterRecurring('unpaid')" class="px-3 py-1 rounded-full tag-btn motion-pressable">Pending (4)</button>
+      </div>
+
+      <!-- Recurring List -->
+      <div id="recurring-list" class="space-y-2.5">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+    <!-- TAB 4: PLANNER (RESOURCE ALLOCATION ENGINE) -->
+    <div id="view-planner" class="flex-1 overflow-y-auto px-4 pb-28 space-y-4 pt-3 hidden">
+      <!-- Exact Monthly Income Card -->
+      <section class="app-card rounded-3xl p-4 space-y-3">
+        <div class="flex justify-between items-center">
+          <span class="text-xs font-bold app-sub uppercase tracking-wider num">Net Monthly Income</span>
+          <span class="text-xs text-cyan-500 font-bold num">FUTURE ALLOCATION</span>
+        </div>
+        <div>
+          <div class="text-[11px] app-sub mb-1">Enter your exact monthly take-home pay:</div>
+          <div class="flex items-center gap-2">
+            <span class="text-2xl font-black app-sub num">$</span>
+            <input id="planner-income-input" oninput="updatePlanner()" type="number" step="50" value="5200" class="w-full app-input border rounded-2xl px-4 py-2 text-2xl font-black num focus:outline-none focus:border-cyan-500">
+          </div>
+        </div>
+
+        <!-- Unassigned Buffer Live Calculator -->
+        <div class="pt-3 border-t border-slate-200 dark:border-slate-700/50 flex justify-between items-center">
+          <div>
+            <div class="text-[11px] app-sub">Unassigned Reserve Buffer</div>
+            <div id="planner-left-amt" class="text-base font-extrabold color-green num">$450.00 left to assign</div>
+          </div>
+          <div id="planner-status-badge" class="px-3 py-1 rounded-full badge-green text-xs font-bold border num">
+            91.3% ALLOCATED
+          </div>
+        </div>
+      </section>
+
+      <!-- Overall Budget Consumption Share Bar -->
+      <section class="app-card rounded-3xl p-4 space-y-3">
+        <div class="flex justify-between items-center text-xs">
+          <span class="font-bold uppercase tracking-wider app-sub">Budget Distribution</span>
+          <span class="app-sub text-[11px] num" id="planner-category-count">6 categories</span>
+        </div>
+
+        <!-- Recessed Neumorphic Distribution Bar -->
+        <div id="planner-stacked-bar" class="w-full h-3.5 app-track rounded-full overflow-hidden flex p-0.5 border">
+          <!-- Filled dynamically -->
+        </div>
+
+        <div id="planner-consumption-legend" class="grid grid-cols-2 gap-2 text-xs pt-1">
+          <!-- Filled dynamically -->
+        </div>
+      </section>
+
+      <!-- Custom Category Allocations List -->
+      <section class="space-y-2">
+        <div class="flex justify-between items-center text-xs font-bold uppercase tracking-wider app-sub px-1">
+          <span>Target Categories</span>
+          <button onclick="addNewPlannerCategory()" class="text-xs font-bold text-cyan-600 dark:text-cyan-400 hover:underline flex items-center gap-1 motion-pressable">
+            + New Category
+          </button>
+        </div>
+
+        <div id="planner-categories-list" class="space-y-2">
+          <!-- Filled dynamically -->
+        </div>
+      </section>
+    </div>
+
+    <!-- BOTTOM TAB NAVIGATION BAR (FROSTED GLASS) -->
+    <nav class="absolute bottom-0 left-0 right-0 h-20 app-bottom-bar border-t px-6 flex items-center justify-between glass-nav z-20">
+      <!-- Tab: Home -->
+      <button onclick="switchTab('home')" id="tab-home" class="flex flex-col items-center gap-1 text-cyan-500 dark:text-cyan-400 transition motion-pressable">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.2" d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10"/></svg>
+        <span class="text-[10px] font-bold">Home</span>
+      </button>
+
+      <!-- Tab: Activity -->
+      <button onclick="switchTab('activity')" id="tab-activity" class="flex flex-col items-center gap-1 text-slate-500 hover:text-slate-900 dark:hover:text-slate-200 transition motion-pressable">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+        <span class="text-[10px] font-bold">Activity</span>
+      </button>
+
+      <!-- CENTER QUICK-ADD FAB WITH CYBER BLOOM GLOW -->
+      <button onclick="openQuickAdd()" class="w-13 h-13 -translate-y-3 bg-gradient-to-tr from-cyan-500 via-indigo-600 to-violet-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-cyan-500/30 hover:scale-105 active:scale-95 transition-transform motion-pressable" aria-label="Add Transaction">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+      </button>
+
+      <!-- Tab: Recurring -->
+      <button onclick="switchTab('recurring')" id="tab-recurring" class="flex flex-col items-center gap-1 text-slate-500 hover:text-slate-900 dark:hover:text-slate-200 transition motion-pressable">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        <span class="text-[10px] font-bold">Obligations</span>
+      </button>
+
+      <!-- Tab: Planner -->
+      <button onclick="switchTab('planner')" id="tab-planner" class="flex flex-col items-center gap-1 text-slate-500 hover:text-slate-900 dark:hover:text-slate-200 transition motion-pressable">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span class="text-[10px] font-bold">Planner</span>
+      </button>
+    </nav>
+
+    <!-- ADAPTIVE FRAMER MOTION GESTURE SHEET -->
+    <div id="quick-add-backdrop" onclick="closeQuickAdd()" class="absolute inset-0 bg-slate-950/75 backdrop-blur-md z-30 opacity-0 pointer-events-none transition-opacity duration-250"></div>
+
+    <div id="quick-add-sheet" class="absolute bottom-0 left-0 right-0 app-card border-t rounded-t-[36px] p-5 shadow-2xl z-40 flex flex-col max-h-[94%]" style="transform: translateY(105%); will-change: transform;">
+      
+      <!-- GESTURE DRAG HANDLE (VELOCITY TRACKED FLING TO DISMISS) -->
+      <div id="sheet-drag-handle" class="w-full py-2 -mt-2 cursor-grab active:cursor-grabbing flex flex-col items-center select-none">
+        <div class="w-12 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full mb-1"></div>
+        <span class="text-[9px] app-sub font-extrabold tracking-widest uppercase opacity-70">FLING DOWN TO DISMISS</span>
+      </div>
+
+      <div class="flex justify-between items-center mb-2">
+        <div class="flex items-center gap-2">
+          <button id="qa-mode-purchase" onclick="setQuickAddMode('purchase')" class="px-3 py-1 rounded-full text-xs font-bold bg-indigo-600 text-white motion-pressable">Purchase (-)</button>
+          <button id="qa-mode-refund" onclick="setQuickAddMode('refund')" class="px-3 py-1 rounded-full text-xs font-bold tag-btn motion-pressable">Inflow (+)</button>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] app-sub hidden sm:inline num">0-9 / ENTER / ESC</span>
+          <button onclick="closeQuickAdd()" class="app-sub hover:app-heading text-xs font-bold p-1 motion-pressable">Close (Esc)</button>
+        </div>
+      </div>
+
+      <!-- AMOUNT DISPLAY WITH GLOWING CYBERPUNK MONOSPACE -->
+      <div class="text-center py-2">
+        <div class="flex items-center justify-center text-4xl sm:text-5xl font-black tracking-tight app-heading num">
+          <span id="qa-prefix" class="text-slate-400 mr-1 text-3xl">$</span>
+          <input id="qa-amount-input" type="text" inputmode="decimal" value="0.00" onfocus="this.select()" oninput="syncAmountInput(this.value)" class="bg-transparent border-0 text-center font-black tracking-tight app-heading num focus:outline-none w-52">
+        </div>
+      </div>
+
+      <!-- MERCHANT INPUT WITH SMART AUTOFILL CHIPS -->
+      <div class="relative my-1">
+        <input id="qa-merchant-input" type="text" placeholder="Merchant or description..." class="w-full app-input border rounded-2xl px-4 py-2.5 text-xs placeholder-slate-400 focus:outline-none focus:border-cyan-500">
+        <div id="qa-suggestions" class="flex gap-1.5 mt-1.5 overflow-x-auto no-scrollbar">
+          <button onclick="pickMerchant('Target', 'Groceries', 'Apple Card')" class="px-2.5 py-1 rounded-lg app-inner-card border text-[11px] font-bold app-sub hover:app-heading motion-pressable">Target</button>
+          <button onclick="pickMerchant('Starbucks', 'Dining', 'Apple Card')" class="px-2.5 py-1 rounded-lg app-inner-card border text-[11px] font-bold app-sub hover:app-heading motion-pressable">Starbucks</button>
+          <button onclick="pickMerchant('Amazon', 'Shopping', 'Amex')" class="px-2.5 py-1 rounded-lg app-inner-card border text-[11px] font-bold app-sub hover:app-heading motion-pressable">Amazon</button>
+          <button onclick="pickMerchant('Shell Oil', 'Gas & Fuel', 'Apple Card')" class="px-2.5 py-1 rounded-lg app-inner-card border text-[11px] font-bold app-sub hover:app-heading motion-pressable">Shell Oil</button>
+        </div>
+      </div>
+
+      <!-- CATEGORY CHIPS -->
+      <div class="my-2 space-y-1">
+        <span class="text-[10px] font-bold uppercase tracking-wider app-sub">Category</span>
+        <div id="qa-cat-chips" class="flex gap-1.5 overflow-x-auto no-scrollbar text-xs font-bold">
+          <button onclick="selectCategory(this, 'Groceries')" class="qa-cat-btn px-3 py-1.5 rounded-xl bg-indigo-600 text-white shrink-0 motion-pressable">🛒 Groceries</button>
+          <button onclick="selectCategory(this, 'Dining')" class="qa-cat-btn px-3 py-1.5 rounded-xl tag-btn shrink-0 motion-pressable">🍕 Dining</button>
+          <button onclick="selectCategory(this, 'Gas & Fuel')" class="qa-cat-btn px-3 py-1.5 rounded-xl tag-btn shrink-0 motion-pressable">⛽ Gas</button>
+          <button onclick="selectCategory(this, 'Shopping')" class="qa-cat-btn px-3 py-1.5 rounded-xl tag-btn shrink-0 motion-pressable">🛍️ Shopping</button>
+        </div>
+      </div>
+
+      <!-- NEUMORPHIC 3D TACTILE NUMPAD (PHYSICAL DEPRESSION ON PRESS) -->
+      <div id="touch-numpad" class="grid grid-cols-3 gap-2 my-2 select-none">
+        <button onclick="pressKey('1')" class="neu-key py-2.5 rounded-2xl text-xl font-black app-heading num">1</button>
+        <button onclick="pressKey('2')" class="neu-key py-2.5 rounded-2xl text-xl font-black app-heading num">2</button>
+        <button onclick="pressKey('3')" class="neu-key py-2.5 rounded-2xl text-xl font-black app-heading num">3</button>
+        <button onclick="pressKey('4')" class="neu-key py-2.5 rounded-2xl text-xl font-black app-heading num">4</button>
+        <button onclick="pressKey('5')" class="neu-key py-2.5 rounded-2xl text-xl font-black app-heading num">5</button>
+        <button onclick="pressKey('6')" class="neu-key py-2.5 rounded-2xl text-xl font-black app-heading num">6</button>
+        <button onclick="pressKey('7')" class="neu-key py-2.5 rounded-2xl text-xl font-black app-heading num">7</button>
+        <button onclick="pressKey('8')" class="neu-key py-2.5 rounded-2xl text-xl font-black app-heading num">8</button>
+        <button onclick="pressKey('9')" class="neu-key py-2.5 rounded-2xl text-xl font-black app-heading num">9</button>
+        <button onclick="pressKey('.')" class="neu-key py-2.5 rounded-2xl text-xl font-black app-heading num">.</button>
+        <button onclick="pressKey('0')" class="neu-key py-2.5 rounded-2xl text-xl font-black app-heading num">0</button>
+        <button onclick="pressKey('DEL')" class="neu-key py-2.5 rounded-2xl text-base font-bold text-rose-500 flex items-center justify-center">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.2" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6-7h12a2 2 0 012 2v10a2 2 0 01-2 2H9l-6-7z"/></svg>
+        </button>
+      </div>
+
+      <!-- COMMIT BUTTON -->
+      <button onclick="commitQuickAdd()" class="w-full py-3.5 mt-1 rounded-2xl bg-gradient-to-r from-cyan-500 via-indigo-600 to-violet-600 hover:opacity-95 text-white font-black text-sm shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2 motion-pressable">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+        Save Transaction (Enter)
+      </button>
+    </div>
+
+  </main>
+
+  <!-- ADD BILL / SUBSCRIPTION MODAL -->
+  <div id="add-recurring-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="app-card border rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center">
+        <h3 class="text-base font-extrabold app-heading">+ Add Obligation</h3>
+        <button onclick="closeModal('add-recurring-modal')" class="app-sub hover:app-heading p-1 text-lg motion-pressable">&times;</button>
+      </div>
+      <form onsubmit="submitNewRecurring(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="app-sub block mb-1 font-bold">Obligation Type</label>
+          <div class="flex gap-2">
+            <label class="flex-1 text-center py-2 rounded-xl bg-indigo-600 text-white font-bold cursor-pointer motion-pressable"><input type="radio" name="rec-type" value="bill" checked class="hidden"> Bill Checklist</label>
+            <label class="flex-1 text-center py-2 rounded-xl tag-btn border font-bold cursor-pointer motion-pressable"><input type="radio" name="rec-type" value="sub" class="hidden"> Subscription</label>
+          </div>
+        </div>
+        <div>
+          <label class="app-sub block mb-1 font-bold">Item Name</label>
+          <input id="rec-name" required placeholder="e.g. Car Insurance, Gym, Spotify" class="w-full app-input border rounded-xl px-3 py-2">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="app-sub block mb-1 font-bold">Expected Amount ($)</label>
+            <input id="rec-amt" required type="number" step="0.01" placeholder="0.00" class="w-full app-input border rounded-xl px-3 py-2 num">
+          </div>
+          <div>
+            <label class="app-sub block mb-1 font-bold">Due Day / Date</label>
+            <input id="rec-day" required placeholder="Day of Month (1-31)" class="w-full app-input border rounded-xl px-3 py-2 num">
+          </div>
+        </div>
+        <button type="submit" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 font-bold text-white transition mt-2 motion-pressable">
+          Save Obligation
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- PWA WALKTHROUGH MODAL -->
+  <div id="pwa-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="app-card border rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
+            📱
+          </div>
+          <h3 class="text-base font-extrabold app-heading">1-Tap Home Screen Setup</h3>
+        </div>
+        <button onclick="closeModal('pwa-modal')" class="app-sub hover:app-heading p-1 text-lg motion-pressable">&times;</button>
+      </div>
+
+      <p class="text-xs app-sub leading-relaxed">
+        Eliminate the browser bar completely. SpendU runs as a standalone full-screen progressive app with zero URL bars:
+      </p>
+
+      <div class="space-y-3 text-xs">
+        <div class="p-3 rounded-2xl app-inner-card border flex items-start gap-3">
+          <span class="w-6 h-6 rounded-lg bg-indigo-500/20 text-indigo-400 font-bold flex items-center justify-center shrink-0">1</span>
+          <div>
+            <div class="font-bold app-heading">Apple iOS (Safari)</div>
+            <p class="text-slate-400 text-[11px] mt-0.5">Tap the <strong>Share</strong> button (box with upward arrow) at the bottom, then scroll and select <strong>"Add to Home Screen"</strong>.</p>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-2xl app-inner-card border flex items-start gap-3">
+          <span class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center shrink-0">2</span>
+          <div>
+            <div class="font-bold app-heading">Android (Chrome)</div>
+            <p class="text-slate-400 text-[11px] mt-0.5">Tap the three dots (⋮) in the top-right corner, then choose <strong>"Install app"</strong> or <strong>"Add to Home screen"</strong>.</p>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-2xl app-inner-card border flex items-start gap-3">
+          <span class="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 font-bold flex items-center justify-center shrink-0">3</span>
+          <div>
+            <div class="font-bold app-heading">Instant Biometric Unlock</div>
+            <p class="text-slate-400 text-[11px] mt-0.5">SpendU launches full-screen with zero browser chrome, ready to unlock with Face ID / Touch ID.</p>
+          </div>
+        </div>
+      </div>
+
+      <button onclick="closeModal('pwa-modal')" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs motion-pressable">
+        Got it!
+      </button>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT: DATA & INTERACTION ENGINE -->
+  <script>
+    /* =========================================================================
+       1. DATA STORE (SEED DATA)
+       ========================================================================= */
+    const initialTransactions = [
+      { id: 'tx-1', date: '2026-11-11', merchant: 'Trader Joe\'s', amount: 64.20, category: 'Groceries', card: 'Apple Card', type: 'purchase', note: 'Weekly produce & groceries' },
+      { id: 'tx-2', date: '2026-11-11', merchant: 'Starbucks Coffee', amount: 6.75, category: 'Dining', card: 'Apple Card', type: 'purchase', note: 'Iced cold brew' },
+      { id: 'tx-3', date: '2026-11-10', merchant: 'Shell Gasoline', amount: 48.00, category: 'Gas & Fuel', card: 'Navy Federal', type: 'purchase', note: 'Full tank refill' },
+      { id: 'tx-4', date: '2026-11-09', merchant: 'Target Superstore', amount: 82.50, category: 'Shopping', card: 'Amex', type: 'purchase', note: 'Home supplies & toiletries' },
+      { id: 'tx-5', date: '2026-11-08', merchant: 'Chipotle Mexican Grill', amount: 18.24, category: 'Dining', card: 'Apple Card', type: 'purchase', note: 'Burrito bowl lunch' },
+      { id: 'tx-6', date: '2026-11-06', merchant: 'Amazon Marketplace', amount: 14.50, category: 'Shopping', card: 'Apple Card', type: 'purchase', note: 'Cable organizer' },
+      { id: 'tx-7', date: '2026-10-31', merchant: 'Costco Wholesale', amount: 212.80, category: 'Groceries', card: 'Amex', type: 'purchase', note: 'Monthly bulk items' },
+      { id: 'tx-8', date: '2026-10-28', merchant: 'Apple Store Refund', amount: 29.00, category: 'Shopping', card: 'Apple Card', type: 'refund', note: 'Returned iPhone case' }
+    ];
+
+    let transactions = [...initialTransactions];
+
+    let recurringItems = [
+      { id: 'rec-1', name: 'Electric (Duke Energy)', amount: 124.50, day: 13, type: 'bill', category: 'Utilities', paid: false },
+      { id: 'rec-2', name: 'Fiber Internet (AT&T)', amount: 70.00, day: 15, type: 'bill', category: 'Utilities', paid: false },
+      { id: 'rec-3', name: 'Car Insurance (Geico)', amount: 145.00, day: 22, type: 'bill', category: 'Insurance', paid: false },
+      { id: 'rec-4', name: 'Water & Trash Utility', amount: 59.50, day: 28, type: 'bill', category: 'Utilities', paid: false },
+      { id: 'rec-5', name: 'Netflix Premium 4K', amount: 22.99, day: 14, type: 'sub', category: 'Entertainment', paid: false },
+      { id: 'rec-6', name: 'Spotify Family Plan', amount: 16.99, day: 2, type: 'sub', category: 'Entertainment', paid: true },
+      { id: 'rec-7', name: 'iCloud 2TB Storage', amount: 9.99, day: 5, type: 'sub', category: 'Cloud & Tech', paid: true },
+      { id: 'rec-8', name: 'Planet Fitness Black Card', amount: 24.99, day: 1, type: 'sub', category: 'Health & Fitness', paid: true }
+    ];
+
+    let plannerCategories = [
+      { id: 'cat-1', name: 'Groceries & Household', planned: 600, color: '#10b981' },
+      { id: 'cat-2', name: 'Dining & Social', planned: 250, color: '#6366f1' },
+      { id: 'cat-3', name: 'Gas & Commuting', planned: 180, color: '#f59e0b' },
+      { id: 'cat-4', name: 'Discretionary Shopping', planned: 200, color: '#ec4899' },
+      { id: 'cat-5', name: 'Fixed Bills & Subs', planned: 475, color: '#06b6d4' },
+      { id: 'cat-6', name: 'Emergency & Savings Fund', planned: 1200, color: '#8b5cf6' }
+    ];
+
+    let currentQuickAddMode = 'purchase';
+    let currentSelectedCategory = 'Groceries';
+    let currentRecurringFilter = 'all';
+
+    /* =========================================================================
+       2. TACTILE HAPTICS SIMULATION (HTML5 VIBRATION API)
+       ========================================================================= */
+    function triggerHaptic(duration = 10) {
+      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+        try { navigator.vibrate(duration); } catch(e){}
+      }
+    }
+
+    /* =========================================================================
+       3. FRAMER MOTION SPRING PHYSICS ENGINE
+       ========================================================================= */
+    function springAnimate(element, properties, config = { stiffness: 340, damping: 28, mass: 1 }, onComplete) {
+      let startTime = null;
+      const startVals = {};
+      const targetVals = {};
+
+      for (const prop in properties) {
+        if (prop === 'translateY') {
+          const currentTransform = element.style.transform;
+          const match = currentTransform.match(/translateY\((-?\d+(?:\.\d+)?)(px|%)\)/);
+          startVals[prop] = match ? parseFloat(match[1]) : 100;
+          targetVals[prop] = properties[prop];
+        } else if (prop === 'opacity') {
+          startVals[prop] = parseFloat(window.getComputedStyle(element).opacity) || 0;
+          targetVals[prop] = properties[prop];
+        }
+      }
+
+      function step(timestamp) {
+        if (!startTime) startTime = timestamp;
+        const elapsed = (timestamp - startTime) / 1000;
+
+        const k = config.stiffness;
+        const c = config.damping;
+        const m = config.mass;
+        const omega0 = Math.sqrt(k / m);
+        const zeta = c / (2 * Math.sqrt(m * k));
+        const omegaD = omega0 * Math.sqrt(1 - zeta * zeta);
+
+        let finished = true;
+
+        for (const prop in properties) {
+          const start = startVals[prop];
+          const target = targetVals[prop];
+          const delta = start - target;
+
+          const envelope = Math.exp(-zeta * omega0 * elapsed);
+          const oscillation = Math.cos(omegaD * elapsed) + (zeta / Math.sqrt(1 - zeta * zeta)) * Math.sin(omegaD * elapsed);
+          const currentVal = target + delta * envelope * oscillation;
+
+          if (prop === 'translateY') {
+            element.style.transform = `translateY(${currentVal}%)`;
+          } else if (prop === 'opacity') {
+            element.style.opacity = currentVal;
+          }
+
+          if (envelope > 0.005) {
+            finished = false;
+          }
+        }
+
+        if (!finished && elapsed < 1.2) {
+          requestAnimationFrame(step);
+        } else {
+          for (const prop in properties) {
+            if (prop === 'translateY') element.style.transform = `translateY(${targetVals[prop]}%)`;
+            if (prop === 'opacity') element.style.opacity = targetVals[prop];
+          }
+          if (onComplete) onComplete();
+        }
+      }
+
+      requestAnimationFrame(step);
+    }
+
+    /* =========================================================================
+       4. VELOCITY DRAG-TO-DISMISS SHEET ENGINE
+       ========================================================================= */
+    let isDragging = false;
+    let dragStartY = 0;
+    let currentDragDeltaY = 0;
+    let lastDragTime = 0;
+    let dragVelocity = 0;
+
+    const dragHandle = document.getElementById('sheet-drag-handle');
+    const sheetEl = document.getElementById('quick-add-sheet');
+
+    function onDragStart(clientY) {
+      isDragging = true;
+      dragStartY = clientY;
+      lastDragTime = performance.now();
+      dragVelocity = 0;
+      sheetEl.style.transition = 'none';
+    }
+
+    function onDragMove(clientY) {
+      if (!isDragging) return;
+      const deltaY = clientY - dragStartY;
+      if (deltaY < 0) {
+        currentDragDeltaY = deltaY * 0.2; // Rubber band resistance
+      } else {
+        currentDragDeltaY = deltaY;
+      }
+      const now = performance.now();
+      const dt = now - lastDragTime;
+      if (dt > 10) {
+        dragVelocity = (clientY - dragStartY) / dt;
+        lastDragTime = now;
+      }
+      sheetEl.style.transform = `translateY(calc(0% + ${currentDragDeltaY}px))`;
+    }
+
+    function onDragEnd() {
+      if (!isDragging) return;
+      isDragging = false;
+
+      // Fling threshold or dragged down past 120px
+      if (currentDragDeltaY > 120 || dragVelocity > 0.6) {
+        triggerHaptic(15);
+        closeQuickAdd();
+      } else {
+        triggerHaptic(8);
+        springAnimate(sheetEl, { translateY: 0 });
+      }
+      currentDragDeltaY = 0;
+    }
+
+    dragHandle.addEventListener('mousedown', (e) => onDragStart(e.clientY));
+    window.addEventListener('mousemove', (e) => onDragMove(e.clientY));
+    window.addEventListener('mouseup', onDragEnd);
+
+    dragHandle.addEventListener('touchstart', (e) => onDragStart(e.touches[0].clientY), { passive: true });
+    window.addEventListener('touchmove', (e) => onDragMove(e.touches[0].clientY), { passive: true });
+    window.addEventListener('touchend', onDragEnd);
+
+    /* =========================================================================
+       5. PHYSICAL KEYBOARD DESKTOP LISTENER
+       ========================================================================= */
+    window.addEventListener('keydown', (e) => {
+      const isQuickAddOpen = sheetEl.style.transform.includes('0%');
+      if (!isQuickAddOpen) {
+        if (e.key === '+' || e.key === '=') {
+          e.preventDefault();
+          openQuickAdd();
+        }
+        return;
+      }
+
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeQuickAdd();
+        return;
+      }
+
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        commitQuickAdd();
+        return;
+      }
+
+      if (document.activeElement.tagName === 'INPUT') return;
+
+      if ((e.key >= '0' && e.key <= '9') || e.key === '.') {
+        e.preventDefault();
+        pressKey(e.key);
+      } else if (e.key === 'Backspace') {
+        e.preventDefault();
+        pressKey('DEL');
+      }
+    });
+
+    /* =========================================================================
+       6. QUICK ADD MODAL & NUMPAD ACTIONS
+       ========================================================================= */
+    let rawAmountBuffer = '0';
+
+    function openQuickAdd() {
+      triggerHaptic(12);
+      rawAmountBuffer = '0';
+      updateAmountDisplay();
+      document.getElementById('qa-merchant-input').value = '';
+
+      const backdrop = document.getElementById('quick-add-backdrop');
+      backdrop.style.pointerEvents = 'auto';
+      backdrop.style.opacity = '1';
+
+      springAnimate(sheetEl, { translateY: 0 });
+
+      setTimeout(() => {
+        const merchantInput = document.getElementById('qa-merchant-input');
+        if (window.innerWidth >= 640) merchantInput.focus();
+      }, 250);
+    }
+
+    function closeQuickAdd() {
+      triggerHaptic(8);
+      const backdrop = document.getElementById('quick-add-backdrop');
+      backdrop.style.opacity = '0';
+      backdrop.style.pointerEvents = 'none';
+
+      springAnimate(sheetEl, { translateY: 105 });
+    }
+
+    function pressKey(key) {
+      triggerHaptic(10);
+      if (key === 'DEL') {
+        if (rawAmountBuffer.length > 1) {
+          rawAmountBuffer = rawAmountBuffer.slice(0, -1);
+        } else {
+          rawAmountBuffer = '0';
+        }
+      } else if (key === '.') {
+        if (!rawAmountBuffer.includes('.')) rawAmountBuffer += '.';
+      } else {
+        if (rawAmountBuffer === '0') {
+          rawAmountBuffer = key;
+        } else {
+          const parts = rawAmountBuffer.split('.');
+          if (parts.length === 2 && parts[1].length >= 2) return;
+          rawAmountBuffer += key;
+        }
+      }
+      updateAmountDisplay();
+    }
+
+    function updateAmountDisplay() {
+      const val = parseFloat(rawAmountBuffer) || 0;
+      document.getElementById('qa-amount-input').value = rawAmountBuffer.includes('.') ? rawAmountBuffer : val.toFixed(2);
+    }
+
+    function syncAmountInput(val) {
+      rawAmountBuffer = val.replace(/[^0-9.]/g, '');
+    }
+
+    function setQuickAddMode(mode) {
+      triggerHaptic(8);
+      currentQuickAddMode = mode;
+      const btnP = document.getElementById('qa-mode-purchase');
+      const btnR = document.getElementById('qa-mode-refund');
+      const prefix = document.getElementById('qa-prefix');
+
+      if (mode === 'purchase') {
+        btnP.className = 'px-3 py-1 rounded-full text-xs font-bold bg-indigo-600 text-white motion-pressable';
+        btnR.className = 'px-3 py-1 rounded-full text-xs font-bold tag-btn motion-pressable';
+        prefix.textContent = '$';
+        prefix.className = 'text-slate-400 mr-1 text-3xl';
+      } else {
+        btnR.className = 'px-3 py-1 rounded-full text-xs font-bold bg-emerald-600 text-white motion-pressable';
+        btnP.className = 'px-3 py-1 rounded-full text-xs font-bold tag-btn motion-pressable';
+        prefix.textContent = '+$';
+        prefix.className = 'color-green mr-1 text-3xl';
+      }
+    }
+
+    function selectCategory(el, catName) {
+      triggerHaptic(6);
+      currentSelectedCategory = catName;
+      document.querySelectorAll('.qa-cat-btn').forEach(btn => {
+        btn.className = 'qa-cat-btn px-3 py-1.5 rounded-xl tag-btn shrink-0 motion-pressable';
+      });
+      el.className = 'qa-cat-btn px-3 py-1.5 rounded-xl bg-indigo-600 text-white shrink-0 motion-pressable';
+    }
+
+    function pickMerchant(name, cat, card) {
+      triggerHaptic(8);
+      document.getElementById('qa-merchant-input').value = name;
+      currentSelectedCategory = cat;
+      document.querySelectorAll('.qa-cat-btn').forEach(btn => {
+        if (btn.textContent.includes(cat)) {
+          btn.className = 'qa-cat-btn px-3 py-1.5 rounded-xl bg-indigo-600 text-white shrink-0 motion-pressable';
+        } else {
+          btn.className = 'qa-cat-btn px-3 py-1.5 rounded-xl tag-btn shrink-0 motion-pressable';
+        }
+      });
+    }
+
+    function commitQuickAdd() {
+      const amount = parseFloat(rawAmountBuffer) || 0;
+      if (amount <= 0) {
+        alert("Please enter a valid amount.");
+        return;
+      }
+      triggerHaptic(20);
+      const merchant = document.getElementById('qa-merchant-input').value.trim() || 'Quick Expense';
+
+      const newTx = {
+        id: 'tx-' + Date.now(),
+        date: new Date().toISOString().split('T')[0],
+        merchant: merchant,
+        amount: amount,
+        category: currentSelectedCategory,
+        card: 'Apple Card',
+        type: currentQuickAddMode,
+        note: 'Added via Quick Add'
+      };
+
+      transactions.unshift(newTx);
+      closeQuickAdd();
+      renderHomeActivity();
+      applyFilters();
+      recalcWeeklySafeToSpend();
+    }
+
+    /* =========================================================================
+       7. CELEBRATORY DOPAMINE RIPPLE FOR BILLS & SUBS
+       ========================================================================= */
+    function markBillPaidWithRipple(btn, name, amt) {
+      triggerHaptic([15, 30, 15]);
+      const card = btn.closest('.app-card');
+      if (card) card.classList.add('ripple-success');
+
+      btn.innerHTML = `<span class="color-green font-black">✓ Settled</span>`;
+      btn.classList.add('pointer-events-none', 'opacity-80');
+
+      const item = recurringItems.find(r => r.name.includes(name));
+      if (item) item.paid = true;
+
+      updateRecurringUI();
+    }
+
+    function confirmSubWithRipple(btn, name, amt) {
+      triggerHaptic([15, 30, 15]);
+      btn.innerHTML = `<span>✓ Confirmed</span>`;
+      btn.className = "mt-3 w-full py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-bold transition pointer-events-none";
+
+      const item = recurringItems.find(r => r.name.includes(name));
+      if (item) item.paid = true;
+
+      updateRecurringUI();
+    }
+
+    /* =========================================================================
+       8. TAB SWITCHING
+       ========================================================================= */
+    function switchTab(tabId) {
+      triggerHaptic(10);
+      const tabs = ['home', 'activity', 'recurring', 'planner'];
+      tabs.forEach(t => {
+        const view = document.getElementById(`view-${t}`);
+        const btn = document.getElementById(`tab-${t}`);
+        if (t === tabId) {
+          view.classList.remove('hidden');
+          btn.className = 'flex flex-col items-center gap-1 text-cyan-500 dark:text-cyan-400 transition motion-pressable';
+        } else {
+          view.classList.add('hidden');
+          btn.className = 'flex flex-col items-center gap-1 text-slate-500 hover:text-slate-900 dark:hover:text-slate-200 transition motion-pressable';
+        }
+      });
+
+      // Update Retro-Cyberpunk Graphic Header Title & Subtitle per Page
+      const headerMap = {
+        home: { title: 'HOME', sub: 'Good morning, Brandon' },
+        activity: { title: 'ACTIVITY', sub: 'Last 7 Days Outflows' },
+        recurring: { title: 'OBLIGATIONS', sub: 'Bills & Subscriptions' },
+        planner: { title: 'PLANNER', sub: 'Income & Budget Targets' }
+      };
+      const headerTitle = document.getElementById('app-header-page');
+      const headerSub = document.getElementById('app-header-sub');
+      if (headerTitle && headerMap[tabId]) {
+        headerTitle.textContent = headerMap[tabId].title;
+        headerSub.textContent = headerMap[tabId].sub;
+      }
+
+      if (tabId === 'activity') applyFilters();
+      if (tabId === 'recurring') renderRecurringList();
+      if (tabId === 'planner') updatePlanner();
+    }
+
+    /* =========================================================================
+       9. ACTIVITY FEED & SCROLLYTELLING CHAPTERS
+       ========================================================================= */
+    function applyFilters() {
+      const search = document.getElementById('activity-search').value.toLowerCase();
+      const dateRange = document.getElementById('filter-date').value;
+      const card = document.getElementById('filter-card').value;
+      const cat = document.getElementById('filter-cat').value;
+      const type = document.getElementById('filter-type').value;
+
+      const now = new Date('2026-11-11');
+
+      const filtered = transactions.filter(t => {
+        if (search && !t.merchant.toLowerCase().includes(search) && !t.note.toLowerCase().includes(search)) return false;
+        if (card !== 'all' && t.card !== card) return false;
+        if (cat !== 'all' && t.category !== cat) return false;
+        if (type !== 'all' && t.type !== type) return false;
+
+        const txDate = new Date(t.date);
+        const diffDays = Math.floor((now - txDate) / (1000 * 60 * 60 * 24));
+
+        if (dateRange === '7days' && diffDays > 7) return false;
+        if (dateRange === '30days' && diffDays > 30) return false;
+        if (dateRange === 'this_month' && (txDate.getMonth() !== now.getMonth() || txDate.getFullYear() !== now.getFullYear())) return false;
+
+        return true;
+      });
+
+      // Update Live Result Counts
+      document.getElementById('tx-count-display').textContent = `SHOWING ${filtered.length} TRANSACTIONS`;
+      const totalSum = filtered.reduce((acc, t) => t.type === 'refund' ? acc - t.amount : acc + t.amount, 0);
+      document.getElementById('tx-total-display').textContent = `TOTAL: $${totalSum.toFixed(2)}`;
+
+      const feed = document.getElementById('activity-feed');
+      feed.innerHTML = '';
+
+      if (filtered.length === 0) {
+        feed.innerHTML = `
+          <div class="text-center py-12 app-sub text-xs">
+            No transactions match the selected filters.
+          </div>
+        `;
+        return;
+      }
+
+      // Group by Scrollytelling Chapters
+      const today = [];
+      const earlier = [];
+
+      filtered.forEach(tx => {
+        if (tx.date === '2026-11-11') today.push(tx);
+        else earlier.push(tx);
+      });
+
+      if (today.length > 0) {
+        const todayHeader = document.createElement('div');
+        todayHeader.className = 'text-[10px] font-black uppercase tracking-wider text-cyan-500 num pt-1';
+        todayHeader.textContent = `Today's Outflows (${today.length})`;
+        feed.appendChild(todayHeader);
+        today.forEach(tx => feed.appendChild(createTxRow(tx)));
+      }
+
+      if (earlier.length > 0) {
+        const earlierHeader = document.createElement('div');
+        earlierHeader.className = 'text-[10px] font-black uppercase tracking-wider app-sub num pt-2';
+        earlierHeader.textContent = `Earlier In Horizon (${earlier.length})`;
+        feed.appendChild(earlierHeader);
+        earlier.forEach(tx => feed.appendChild(createTxRow(tx)));
+      }
+    }
+
+    function createTxRow(tx) {
+      const row = document.createElement('div');
+      row.className = 'app-card rounded-2xl p-3 flex items-center justify-between motion-pressable';
+      const isRefund = tx.type === 'refund';
+      const icon = tx.category === 'Groceries' ? '🛒' : tx.category === 'Dining' ? '🍕' : tx.category === 'Gas & Fuel' ? '⛽' : '🛍️';
+
+      row.innerHTML = `
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl app-inner-card border flex items-center justify-center text-base">
+            ${icon}
+          </div>
+          <div>
+            <div class="text-xs font-bold app-heading flex items-center gap-1.5">
+              ${tx.merchant}
+              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-500 num">${tx.card}</span>
+            </div>
+            <div class="text-[10px] app-sub flex items-center gap-1 mt-0.5">
+              <span>${tx.date}</span> · <span>${tx.category}</span>
+            </div>
+          </div>
+        </div>
+        <div class="text-right">
+          <div class="text-xs font-black ${isRefund ? 'color-green' : 'app-heading'} num">
+            ${isRefund ? '+' : '-'}$${tx.amount.toFixed(2)}
+          </div>
+          <div class="text-[10px] app-sub opacity-75">${tx.note}</div>
+        </div>
+      `;
+      return row;
+    }
+
+    function renderHomeActivity() {
+      const list = document.getElementById('home-tx-list');
+      list.innerHTML = '';
+      transactions.slice(0, 4).forEach(tx => list.appendChild(createTxRow(tx)));
+    }
+
+    /* =========================================================================
+       10. RECURRING HUB ENGINE (BILLS & SUBS)
+       ========================================================================= */
+    function filterRecurring(type) {
+      triggerHaptic(8);
+      currentRecurringFilter = type;
+      ['all', 'bill', 'sub', 'unpaid'].forEach(k => {
+        const btn = document.getElementById(`rf-${k}`);
+        if (k === type) {
+          btn.className = 'px-3 py-1 rounded-full bg-indigo-600 text-white motion-pressable';
+        } else {
+          btn.className = 'px-3 py-1 rounded-full tag-btn motion-pressable';
+        }
+      });
+      renderRecurringList();
+    }
+
+    function renderRecurringList() {
+      const container = document.getElementById('recurring-list');
+      container.innerHTML = '';
+
+      const filtered = recurringItems.filter(item => {
+        if (currentRecurringFilter === 'bill') return item.type === 'bill';
+        if (currentRecurringFilter === 'sub') return item.type === 'sub';
+        if (currentRecurringFilter === 'unpaid') return !item.paid;
+        return true;
+      });
+
+      filtered.forEach(item => {
+        const card = document.createElement('div');
+        card.className = `app-card rounded-2xl p-3.5 flex items-center justify-between motion-pressable ${item.paid ? 'opacity-65' : ''}`;
+        
+        card.innerHTML = `
+          <div class="flex items-center gap-3">
+            <button onclick="toggleRecurringItemPaid('${item.id}')" class="w-7 h-7 rounded-xl border flex items-center justify-center transition ${item.paid ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-400 dark:border-slate-600 hover:border-emerald-400'}">
+              ${item.paid ? '✓' : ''}
+            </button>
+            <div>
+              <div class="text-xs font-bold app-heading flex items-center gap-1.5">
+                ${item.name}
+                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${item.type === 'bill' ? 'badge-amber' : 'badge-green'} border uppercase num">${item.type}</span>
+              </div>
+              <div class="text-[10px] app-sub num mt-0.5">
+                Due Day ${item.day} of month · ${item.category}
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="text-right">
+              <div class="text-xs font-black app-heading num">$${item.amount.toFixed(2)}</div>
+              <div class="text-[10px] font-bold ${item.paid ? 'color-green' : 'text-amber-500'} num">
+                ${item.paid ? 'SETTLED' : 'PENDING'}
+              </div>
+            </div>
+            <button onclick="deleteRecurringItem('${item.id}')" class="text-slate-400 hover:text-rose-500 p-1 text-xs motion-pressable" title="Delete">✕</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      updateRecurringUI();
+    }
+
+    function toggleRecurringItemPaid(id) {
+      triggerHaptic(12);
+      const item = recurringItems.find(r => r.id === id);
+      if (item) {
+        item.paid = !item.paid;
+        renderRecurringList();
+      }
+    }
+
+    function deleteRecurringItem(id) {
+      triggerHaptic(12);
+      if (confirm("Remove this recurring obligation?")) {
+        recurringItems = recurringItems.filter(r => r.id !== id);
+        renderRecurringList();
+      }
+    }
+
+    function updateRecurringUI() {
+      const remaining = recurringItems.filter(r => !r.paid).reduce((acc, r) => acc + r.amount, 0);
+      const paidSum = recurringItems.filter(r => r.paid).reduce((acc, r) => acc + r.amount, 0);
+      const paidCount = recurringItems.filter(r => r.paid).length;
+
+      const remEl = document.getElementById('recurring-remaining-amt');
+      if (remEl) remEl.innerHTML = `$${remaining.toFixed(2)} <span class="text-xs app-sub font-normal">due</span>`;
+      
+      const statusEl = document.getElementById('recurring-status-line');
+      if (statusEl) statusEl.textContent = `${paidCount} of ${recurringItems.length} items settled ($${paidSum.toFixed(2)} paid)`;
+    }
+
+    function submitNewRecurring(e) {
+      e.preventDefault();
+      triggerHaptic(15);
+      const name = document.getElementById('rec-name').value;
+      const amt = parseFloat(document.getElementById('rec-amt').value) || 0;
+      const day = parseInt(document.getElementById('rec-day').value) || 1;
+      const type = document.querySelector('input[name="rec-type"]:checked').value;
+
+      recurringItems.push({
+        id: 'rec-' + Date.now(),
+        name: name,
+        amount: amt,
+        day: day,
+        type: type,
+        category: 'Custom',
+        paid: false
+      });
+
+      closeModal('add-recurring-modal');
+      renderRecurringList();
+    }
+
+    /* =========================================================================
+       11. PLANNER RESOURCE ENGINE (LIVE SYNC TO HOME SAFE-TO-SPEND)
+       ========================================================================= */
+    function updatePlanner() {
+      const income = parseFloat(document.getElementById('planner-income-input').value) || 5200;
+      const totalPlanned = plannerCategories.reduce((acc, c) => acc + c.planned, 0);
+      const remaining = income - totalPlanned;
+      const pctAllocated = ((totalPlanned / income) * 100).toFixed(1);
+
+      const leftAmt = document.getElementById('planner-left-amt');
+      leftAmt.textContent = `$${remaining.toFixed(2)} unassigned buffer`;
+      if (remaining < 0) {
+        leftAmt.className = 'text-base font-extrabold text-rose-500 num';
+      } else {
+        leftAmt.className = 'text-base font-extrabold color-green num';
+      }
+
+      document.getElementById('planner-status-badge').textContent = `${pctAllocated}% ALLOCATED`;
+      document.getElementById('planner-category-count').textContent = `${plannerCategories.length} categories`;
+
+      // Render Stacked Distribution Bar
+      const stackedBar = document.getElementById('planner-stacked-bar');
+      stackedBar.innerHTML = '';
+      plannerCategories.forEach(cat => {
+        const seg = document.createElement('div');
+        const share = ((cat.planned / income) * 100).toFixed(1);
+        seg.style.width = `${share}%`;
+        seg.style.backgroundColor = cat.color;
+        seg.className = 'h-full first:rounded-l-full last:rounded-r-full transition-all duration-300';
+        seg.title = `${cat.name}: $${cat.planned} (${share}%)`;
+        stackedBar.appendChild(seg);
+      });
+
+      // Render Category Allocation Cards
+      const list = document.getElementById('planner-categories-list');
+      list.innerHTML = '';
+      plannerCategories.forEach(cat => {
+        const card = document.createElement('div');
+        card.className = 'app-card rounded-2xl p-3 flex items-center justify-between motion-pressable';
+        const weeklyShare = (cat.planned / 4.33).toFixed(2);
+        const sharePct = ((cat.planned / income) * 100).toFixed(1);
+
+        card.innerHTML = `
+          <div class="flex items-center gap-2.5">
+            <span class="w-3 h-3 rounded-full" style="background-color: ${cat.color}"></span>
+            <div>
+              <div class="text-xs font-bold app-heading">${cat.name}</div>
+              <div class="text-[10px] app-sub num">$${weeklyShare}/wk · ${sharePct}% of budget</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="flex items-center border rounded-xl px-2 py-1 app-input text-xs font-extrabold num">
+              <span>$</span>
+              <input type="number" step="10" value="${cat.planned}" onchange="editPlannerCategory('${cat.id}', this.value)" class="bg-transparent w-16 text-right focus:outline-none">
+            </div>
+            <button onclick="removePlannerCategory('${cat.id}')" class="text-slate-400 hover:text-rose-500 text-xs p-1 motion-pressable">✕</button>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+
+      // Recalculate Home Safe to Spend
+      updateHomeSafeToSpend(income, totalPlanned);
+    }
+
+    function editPlannerCategory(id, val) {
+      triggerHaptic(8);
+      const c = plannerCategories.find(item => item.id === id);
+      if (c) {
+        c.planned = parseFloat(val) || 0;
+        updatePlanner();
+      }
+    }
+
+    function addNewPlannerCategory() {
+      triggerHaptic(10);
+      const name = prompt("Enter category name (e.g. Vacation, Fitness, Pet Care):");
+      if (!name) return;
+      const planned = parseFloat(prompt("Enter monthly budget amount for " + name + ":", "150")) || 150;
+      const colors = ["#8b5cf6", "#f43f5e", "#0ea5e9", "#eab308", "#10b981", "#00f59b", "#00e5ff"];
+      const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
+      plannerCategories.push({
+        id: 'cat-' + Date.now(),
+        name: name,
+        planned: planned,
+        color: randomColor
+      });
+      updatePlanner();
+    }
+
+    function removePlannerCategory(id) {
+      triggerHaptic(12);
+      if (confirm("Remove this category from your budget plan?")) {
+        plannerCategories = plannerCategories.filter(c => c.id !== id);
+        updatePlanner();
+      }
+    }
+
+    function updateHomeSafeToSpend(income, allocated) {
+      const weekly = (allocated / 4.33).toFixed(2);
+      const heroVal = document.getElementById('hero-weekly-val');
+      if (heroVal) {
+        heroVal.innerHTML = `$${weekly} <span class="text-sm font-semibold app-sub font-sans">/ this week</span>`;
+      }
+    }
+
+    function recalcWeeklySafeToSpend() {
+      // Refresh Safe-to-Spend calculations
+      updatePlanner();
+    }
+
+    /* =========================================================================
+       12. MODALS & VIEWPORT TOGGLE
+       ========================================================================= */
+    function openModal(id) {
+      triggerHaptic(10);
+      const m = document.getElementById(id);
+      if (m) m.classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+      triggerHaptic(8);
+      const m = document.getElementById(id);
+      if (m) m.classList.add('hidden');
+    }
+
+    function setDeviceView(mode) {
+      triggerHaptic(10);
+      const container = document.getElementById('app-container');
+      const btnM = document.getElementById('btn-device-mobile');
+      const btnF = document.getElementById('btn-device-fluid');
+      const notch = document.getElementById('phone-notch');
+
+      if (mode === 'mobile') {
+        container.style.maxWidth = '430px';
+        container.style.borderRadius = '44px';
+        btnM.className = 'px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-600 text-white flex items-center gap-1.5 transition';
+        btnF.className = 'px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-white flex items-center gap-1.5 transition';
+        notch.classList.remove('hidden');
+      } else {
+        container.style.maxWidth = '1000px';
+        container.style.borderRadius = '24px';
+        btnF.className = 'px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-600 text-white flex items-center gap-1.5 transition';
+        btnM.className = 'px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-white flex items-center gap-1.5 transition';
+        notch.classList.add('hidden');
+      }
+    }
+
+    function toggleTheme() {
+      triggerHaptic(12);
+      const html = document.documentElement;
+      const isDark = html.classList.contains('dark');
+      const iconSun = document.getElementById('theme-icon-sun');
+      const iconMoon = document.getElementById('theme-icon-moon');
+      const text = document.getElementById('theme-text');
+
+      if (isDark) {
+        html.classList.remove('dark');
+        iconSun.classList.remove('hidden');
+        iconMoon.classList.add('hidden');
+        text.textContent = 'Solarpunk Glass';
+      } else {
+        html.classList.add('dark');
+        iconSun.classList.add('hidden');
+        iconMoon.classList.remove('hidden');
+        text.textContent = 'Cyber Obsidian';
+      }
+    }
+
+    /* Initialize on load */
+    renderHomeActivity();
+    renderRecurringList();
+    updatePlanner();
+  </script>
+</body>
+</html>

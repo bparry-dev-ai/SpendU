@@ -66,3 +66,42 @@ export function useFetch(path) {
 
 export const activeCards = (meta) => meta.cards.filter((c) => !c.archived)
 export const activeCategories = (meta) => meta.categories.filter((c) => !c.archived)
+
+// ----- Theme -----
+// The choice ('system' | 'light' | 'dark') is saved in localStorage. What's
+// actually showing is always written to <html data-theme="light|dark">, which
+// both styles.css and Tailwind's dark: classes key off. index.html does the
+// same before first paint.
+const THEME_KEY = 'spendu-theme'
+const THEME_EVENT = 'spendu:theme-changed'
+const systemDark = window.matchMedia('(prefers-color-scheme: dark)')
+
+function storedTheme() {
+  try { return localStorage.getItem(THEME_KEY) || 'system' } catch { return 'system' }
+}
+
+const resolveIsDark = (pref) => (pref === 'system' ? systemDark.matches : pref === 'dark')
+
+function applyTheme(pref) {
+  const isDark = resolveIsDark(pref)
+  document.documentElement.dataset.theme = isDark ? 'dark' : 'light'
+  try { localStorage.setItem(THEME_KEY, pref) } catch { /* private mode */ }
+  window.dispatchEvent(new CustomEvent(THEME_EVENT, { detail: { pref, isDark } }))
+}
+
+// Follow the phone/computer setting while the choice is "System".
+systemDark.addEventListener('change', () => { if (storedTheme() === 'system') applyTheme('system') })
+
+export function useTheme() {
+  const [state, setState] = useState(() => {
+    const pref = storedTheme()
+    return { pref, isDark: resolveIsDark(pref) }
+  })
+  useEffect(() => {
+    const onChange = (e) => setState(e.detail)
+    window.addEventListener(THEME_EVENT, onChange)
+    return () => window.removeEventListener(THEME_EVENT, onChange)
+  }, [])
+  const toggleTheme = useCallback(() => applyTheme(state.isDark ? 'light' : 'dark'), [state.isDark])
+  return { theme: state.pref, isDark: state.isDark, setTheme: applyTheme, toggleTheme }
+}

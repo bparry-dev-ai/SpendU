@@ -1,0 +1,16 @@
+{
+  "name": "SpendU",
+  "short_name": "SpendU",
+  "description": "Track spending, cards and bills.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#060814",
+  "theme_color": "#060814",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

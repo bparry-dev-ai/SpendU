@@ -1,4 +1,5 @@
 // Small building blocks used across pages.
+import { motion, useDragControls } from 'framer-motion'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { money, monthLabel, shiftMonth } from '../format'
@@ -136,17 +137,46 @@ export function Sheet({ title, onClose, children, footer, wide }) {
       document.body.classList.remove('no-scroll')
     }
   }, [onClose])
+
+  // Dragging starts from the grab bar only, so scrolling or selecting text
+  // inside the sheet never moves it. Let go far or fast enough and it closes.
+  const dragControls = useDragControls()
+  const handleDragEnd = (_, info) => {
+    if (info.offset.y > 90 || info.velocity.y > 400) onClose()
+  }
+
   return (
-    <div className="sheet-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div className={`sheet ${wide ? 'wide' : ''}`} role="dialog" aria-modal="true" aria-label={title}>
+    <motion.div
+      className="sheet-backdrop"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.18, ease: 'easeOut' }}
+      onMouseDown={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <motion.div
+        className={`sheet ${wide ? 'wide' : ''}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        initial={{ y: 35, opacity: 0.85, scale: 0.98 }}
+        animate={{ y: 0, opacity: 1, scale: 1 }}
+        transition={{ type: 'spring', damping: 28, stiffness: 340 }}
+        drag="y"
+        dragControls={dragControls}
+        dragListener={false}
+        dragConstraints={{ top: 0, bottom: 0 }}
+        dragElastic={{ top: 0.04, bottom: 0.6 }}
+        onDragEnd={handleDragEnd}
+      >
+        <div className="sheet-drag-handle" title="Drag down to close" onPointerDown={(e) => dragControls.start(e)} />
         <header className="sheet-head">
           <h2>{title}</h2>
           <button className="icon-btn" aria-label="Close" onClick={onClose}><X size={20} /></button>
         </header>
         <div className="sheet-body">{children}</div>
         {footer && <footer className="sheet-foot">{footer}</footer>}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
 

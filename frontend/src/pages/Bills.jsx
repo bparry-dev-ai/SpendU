@@ -33,6 +33,10 @@ function dueText(item, today) {
 function ChecklistRow({ item, month }) {
   const { openSheet, today, family } = useApp()
   const paid = item.status === 'paid'
+  const handleMarkPaid = () => {
+    if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10)
+    openSheet({ type: 'bill-payment', bill: item, month })
+  }
   return (
     <div className={`check-row ${item.status}`}>
       <span className={`check-mark ${paid ? 'on' : ''}`}>{paid && <CheckCircle2 size={22} />}</span>
@@ -55,7 +59,7 @@ function ChecklistRow({ item, month }) {
             <button key={p.id} className="link small" onClick={() => openSheet({ type: 'bill-payment', payment: { ...p, bill_id: item.bill_id, bill_month: month } })}>Edit</button>
           ))
         ) : (
-          <button className="btn small primary" onClick={() => openSheet({ type: 'bill-payment', bill: item, month })}>Mark paid</button>
+          <button className="btn small primary" onClick={handleMarkPaid}>Mark paid</button>
         )}
       </div>
     </div>
@@ -169,12 +173,19 @@ function BillEditor({ bill, onClose }) {
 export default function Bills() {
   const { today } = useApp()
   const [month, setMonth] = useState(today.slice(0, 7))
+  const [filter, setFilter] = useState('all') // 'all' | 'unpaid' | 'paid'
   const [editor, setEditor] = useState(null) // null | 'new' | bill
   const [showAll, setShowAll] = useState(false)
   const { data, error, reload } = useFetch(`/bills/checklist?month=${month}`)
   const all = useFetch('/bills')
 
   const summary = data?.summary
+  const filteredItems = data?.items.filter((i) => {
+    if (filter === 'unpaid') return i.status !== 'paid'
+    if (filter === 'paid') return i.status === 'paid'
+    return true
+  }) || []
+
   return (
     <div className="page">
       <PageHeader title="Bills" subtitle="Your monthly checklist — tap Mark paid as you pay each one."
@@ -202,13 +213,30 @@ export default function Bills() {
             </Card>
           )}
 
+          {data.items.length > 0 && (
+            <Segmented
+              size="sm"
+              value={filter}
+              onChange={setFilter}
+              options={[
+                { value: 'all', label: `All (${data.items.length})` },
+                { value: 'unpaid', label: `Left to pay (${summary.count - summary.paid})` },
+                { value: 'paid', label: `Paid (${summary.paid})` },
+              ]}
+            />
+          )}
+
           {data.items.length === 0 && data.needs_setup.length > 0 ? null : data.items.length === 0 ? (
             <Empty icon="🧾" title="No bills due this month"
               action={<button className="btn primary" onClick={() => setEditor('new')}><Plus size={16} /> Add a bill</button>}>
               Add your recurring bills (rent, phone, insurance…) with a due day, and they'll show up here every month.
             </Empty>
+          ) : filteredItems.length === 0 ? (
+            <Empty icon="✨" title={`No ${filter === 'paid' ? 'paid' : 'unpaid'} bills`}>
+              {filter === 'paid' ? 'No bills marked as paid yet this month.' : 'All caught up! Every bill for this month is paid.'}
+            </Empty>
           ) : (
-            <div className="card">{data.items.map((i) => <ChecklistRow key={i.bill_id} item={i} month={month} />)}</div>
+            <div className="card">{filteredItems.map((i) => <ChecklistRow key={i.bill_id} item={i} month={month} />)}</div>
           )}
 
           {data.other_payments.length > 0 && (

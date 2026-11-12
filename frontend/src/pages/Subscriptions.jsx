@@ -86,6 +86,13 @@ function SubscriptionEditor({ item, onClose }) {
 export default function Subscriptions() {
   const { data, error, reload } = useFetch('/recurring')
   const [editor, setEditor] = useState(null)
+  const [subFilter, setSubFilter] = useState('all')
+
+  const filteredSubs = data?.items.filter((i) => {
+    if (subFilter === 'active') return i.active
+    if (subFilter === 'paused') return !i.active
+    return true
+  }) || []
 
   return (
     <div className="page">
@@ -107,18 +114,34 @@ export default function Subscriptions() {
           {data.items.some((i) => i.pending) && (
             <Card title="Waiting for you to confirm"><PendingSubscriptions items={data.items.filter((i) => i.pending)} /></Card>
           )}
+
+          <Segmented
+            size="sm"
+            value={subFilter}
+            onChange={setSubFilter}
+            options={[
+              { value: 'all', label: `All (${data.items.length})` },
+              { value: 'active', label: `Active (${data.items.filter((i) => i.active).length})` },
+              { value: 'paused', label: `Paused (${data.items.filter((i) => !i.active).length})` },
+            ]}
+          />
+
           <div className="card">
-            {data.items.map((i) => (
-              <button key={i.recurring_id} className={`tx-row ${i.active ? '' : 'archived'}`} onClick={() => setEditor(i)}>
-                <CategoryIcon icon={i.category_icon} color={i.category_color} />
-                <span className="tx-main">
-                  <span className="tx-title">{i.name} {!i.active && <Badge>Paused</Badge>}</span>
-                  <span className="tx-detail">{FREQ[i.frequency]} · next {fmtDate(i.next_date)} · {i.card}</span>
-                </span>
-                <Money value={i.amount} />
-                <Pencil size={14} className="muted" />
-              </button>
-            ))}
+            {filteredSubs.length === 0 ? (
+              <p className="muted small center card pad">No subscriptions in this view.</p>
+            ) : (
+              filteredSubs.map((i) => (
+                <button key={i.recurring_id} className={`tx-row ${i.active ? '' : 'archived'}`} onClick={() => setEditor(i)}>
+                  <CategoryIcon icon={i.category_icon} color={i.category_color} />
+                  <span className="tx-main">
+                    <span className="tx-title">{i.name} {!i.active && <Badge>Paused</Badge>}</span>
+                    <span className="tx-detail">{FREQ[i.frequency]} · next {fmtDate(i.next_date)} · {i.card}</span>
+                  </span>
+                  <Money value={i.amount} />
+                  <Pencil size={14} className="muted" />
+                </button>
+              ))
+            )}
           </div>
         </>
       )}

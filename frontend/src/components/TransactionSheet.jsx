@@ -1,14 +1,29 @@
-// Add or edit a spending entry (purchase or refund). The "Bill" tab switches
-// to the bill-payment form, so one Add button covers everything.
-import { Plus } from 'lucide-react'
+// Add or edit a spending entry (purchase or refund). The "Bill" and
+// "Subscription" tabs switch to those forms, so one Add button covers everything.
+import { Plus, Repeat } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { del, get, patch, post, query } from '../api'
 import { addDays } from '../format'
 import { activeCards, activeCategories, useApp } from '../state'
 import { BillPaymentForm } from './BillPaymentSheet'
+import SubscriptionChargeForm from './SubscriptionChargeForm'
 import { ConfirmButton, Field, Pills, Segmented, Sheet } from './ui'
 
 const LAST_CARD_KEY = 'spendu-last-card'
+const ADD_TABS = [
+  { value: 'purchase', label: 'Purchase' }, { value: 'refund', label: 'Refund' },
+  { value: 'bill', label: 'Bill' }, { value: 'subscription', label: 'Subscription' },
+]
+
+// The active subscription a typed merchant refers to, e.g. "NETFLIX.COM" → Netflix.
+function matchSubscription(subs, merchant) {
+  const m = (merchant || '').trim().toLowerCase()
+  if (m.length < 3) return null
+  return subs.find((s) => {
+    const n = s.name.trim().toLowerCase()
+    return n.length >= 3 && (m.includes(n) || n.includes(m))
+  }) || null
+}
 
 function readLastCard() {
   try { return Number(localStorage.getItem(LAST_CARD_KEY)) || null } catch { return null }
@@ -108,7 +123,26 @@ export default function TransactionSheet({ entry, onClose }) {
   const [showNotes, setShowNotes] = useState(Boolean(entry?.notes))
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
+  const [subs, setSubs] = useState(null)        // your active subscriptions (null while loading)
+  const [subStart, setSubStart] = useState({})  // what the Subscription tab opens with
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }))
+
+  useEffect(() => {
+    if (editing) return
+    get('/recurring').then((r) => setSubs(r.items.filter((i) => i.active))).catch(() => setSubs([]))
+  }, [editing])
+
+  // Switching tabs: carry what's been typed so far over to the Subscription form.
+  const switchMode = (next, sub) => {
+    if (next === 'subscription') {
+      setSubStart({
+        recurring_id: sub?.recurring_id, amount: form.amount, date: form.date !== today ? form.date : undefined,
+        card_id: form.card_id, merchant: form.merchant, category_id: form.category_id,
+      })
+    }
+    setMode(next)
+  }
+  const subMatch = !editing && mode === 'purchase' && subs ? matchSubscription(subs, form.merchant) : null
 
   const applyMerchantCategory = (s) => {
     if (!categoryTouched && s.category_id && categories.some((c) => c.category_id === s.category_id)) {
@@ -155,9 +189,19 @@ export default function TransactionSheet({ entry, onClose }) {
   if (mode === 'bill') {
     return (
       <Sheet title="Pay a bill" onClose={onClose}>
-        <Segmented value={mode} onChange={setMode}
-          options={[{ value: 'purchase', label: 'Purchase' }, { value: 'refund', label: 'Refund' }, { value: 'bill', label: 'Bill' }]} />
+        <Segmented value={mode} onChange={switchMode} options={ADD_TABS} />
         <BillPaymentForm onDone={onClose} />
+      </Sheet>
+    )
+  }
+
+  if (mode === 'subscription') {
+    return (
+      <Sheet title="Subscription charge" onClose={onClose}>
+        <Segmented value={mode} onChange={switchMode} options={ADD_TABS} />
+        {subs === null ? <p className="muted small">Loading your subscriptions…</p> : (
+          <SubscriptionChargeForm key={subStart.recurring_id ?? 'pick'} subs={subs} initial={subStart} onDone={onClose} />
+        )}
       </Sheet>
     )
   }
@@ -177,8 +221,7 @@ export default function TransactionSheet({ entry, onClose }) {
     <Sheet title={editing ? 'Edit transaction' : 'Add transaction'} onClose={onClose} footer={footer}>
       <form id="tx-form" onSubmit={save} className="stack">
         {!editing ? (
-          <Segmented value={mode} onChange={setMode}
-            options={[{ value: 'purchase', label: 'Purchase' }, { value: 'refund', label: 'Refund' }, { value: 'bill', label: 'Bill' }]} />
+          <Segmented value={mode} onChange={switchMode} options={ADD_TABS} />
         ) : (
           <Segmented value={mode} onChange={setMode}
             options={[{ value: 'purchase', label: 'Purchase' }, { value: 'refund', label: 'Refund / credit' }]} />
@@ -193,6 +236,17 @@ export default function TransactionSheet({ entry, onClose }) {
         <Field label="Merchant">
           <MerchantInput value={form.merchant} onChange={(v) => set('merchant', v)} onPick={pickMerchant} onExact={applyMerchantCategory} />
         </Field>
+
+        {subMatch && (
+          <div className="notice row">
+            <Repeat size={16} />
+            <span>{subMatch.name} is one of your subscriptions.</span>
+            <span className="spacer" />
+            <button type="button" className="btn small primary" onClick={() => switchMode('subscription', subMatch)}>
+              Log as subscription
+            </button>
+          </div>
+        )}
 
         <Field label="Category">
           {categories.length === 0 && <p className="muted small">No categories yet — add your first one.</p>}

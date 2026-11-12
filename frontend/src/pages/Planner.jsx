@@ -374,11 +374,11 @@ export default function Planner() {
                 onSave={(income) => updatePlan({ income }, 'Income saved')} placeholder="Enter income" />
               <div className="plan-figure">
                 <span className="amount-block-label">Planned</span>
-                <span className="plan-num">{money(data.summary.planned)}</span>
+                <span className="plan-num font-mono">{money(data.summary.planned)}</span>
               </div>
               <div className={`plan-figure ${data.summary.left_to_assign < -0.005 ? 'neg' : data.summary.left_to_assign > 0.5 ? 'pos' : 'zero'}`}>
                 <span className="amount-block-label">{data.summary.left_to_assign < -0.005 ? 'Over-planned by' : 'Left to assign'}</span>
-                <span className="plan-num">{money(Math.abs(data.summary.left_to_assign))}</span>
+                <span className="plan-num font-mono">{money(Math.abs(data.summary.left_to_assign))}</span>
               </div>
             </div>
             <SplitBar report={data} />

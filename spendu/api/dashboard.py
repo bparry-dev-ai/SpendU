@@ -33,6 +33,17 @@ def daily_cumulative(conn, start, days, user_id):
     return out
 
 
+def monthly_budget(limits):
+    """Your own spending budget for the month, behind Home's "safe to spend"
+    figure: the overall limit if you set one in the Planner, otherwise your
+    planned categories added up. None when you haven't planned anything."""
+    mine = [l for l in limits if not l["is_family"]]
+    cap = next((l for l in mine if str(l["line_id"]).startswith("cap-")), None)
+    if cap:
+        return cap["amount"]
+    return money(sum(l["amount"] for l in mine)) or None
+
+
 @bp.get("/dashboard")
 @login_required
 def dashboard():
@@ -93,5 +104,6 @@ def dashboard():
         "bills": {"summary": checklist["summary"], "open": open_bills},
         "pending_recurring": pending_items(conn),
         "budgets": limits[:4],
+        "budget_total": monthly_budget(limits),
         "recent": recent,
     }

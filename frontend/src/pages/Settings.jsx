@@ -4,19 +4,23 @@ import { useEffect, useState } from 'react'
 import { del, patch, post } from '../api'
 import { Card, ConfirmButton, Field, PageHeader, Segmented } from '../components/ui'
 import { fmtDate } from '../format'
-import { useApp, useFetch } from '../state'
+import { useApp, useFetch, useTheme } from '../state'
 
 const SWATCHES = ['#6366f1', '#14b8a6', '#f59e0b', '#ec4899', '#22c55e', '#3b82f6', '#ef4444', '#a855f7', '#06b6d4', '#84cc16', '#f97316', '#64748b']
 
 function ThemePicker() {
-  const read = () => { try { return localStorage.getItem('spendu-theme') || 'system' } catch { return 'system' } }
-  const [theme, setTheme] = useState(read)
-  useEffect(() => {
-    if (theme === 'system') delete document.documentElement.dataset.theme
-    else document.documentElement.dataset.theme = theme
-    try { localStorage.setItem('spendu-theme', theme) } catch { /* private mode */ }
-  }, [theme])
-  return <Segmented value={theme} onChange={setTheme} options={[{ value: 'system', label: 'System' }, { value: 'light', label: 'Light' }, { value: 'dark', label: 'Dark' }]} />
+  const { theme, setTheme } = useTheme()
+  return (
+    <Segmented
+      value={theme}
+      onChange={setTheme}
+      options={[
+        { value: 'system', label: 'System' },
+        { value: 'light', label: 'Light' },
+        { value: 'dark', label: 'Dark' },
+      ]}
+    />
+  )
 }
 
 function LookupManager({ kind, items, idKey, label, withIcon }) {
