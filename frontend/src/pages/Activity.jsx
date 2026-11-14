@@ -1,10 +1,10 @@
 // Full searchable history of spending, refunds and bill payments.
-import { Download, Search, SlidersHorizontal } from 'lucide-react'
+import { CalendarRange, ChevronLeft, ChevronRight, Download, Search, SlidersHorizontal } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { get, query } from '../api'
 import TransactionList from '../components/TransactionList'
 import { Empty, ErrorNote, Money, PageHeader, Segmented, Spinner } from '../components/ui'
-import { addDays, shiftMonth } from '../format'
+import { addDays, fmtDate, money, shiftMonth, shiftRange } from '../format'
 import { useApp } from '../state'
 
 function rangeFor(preset, today) {
@@ -28,7 +28,70 @@ const TIME_PRESETS = [
   { value: 'this_month', label: 'This month' },
   { value: '30_days', label: 'Last 30 days' },
   { value: 'all', label: 'All time' },
+  { value: 'custom', label: 'Custom dates' },
 ]
+const CUSTOM_KEY = 'spendu-activity-range'
+
+function readCustom(today) {
+  try {
+    const saved = JSON.parse(localStorage.getItem(CUSTOM_KEY))
+    if (saved?.start && saved?.end) return saved
+  } catch { /* private mode or bad data */ }
+  return { start: `${today.slice(0, 7)}-01`, end: today }
+}
+
+// Pick any date range, e.g. a card statement period (15 Oct – 14 Nov), and
+// step it a month at a time to check statement after statement.
+function CustomRange({ value, onChange }) {
+  const set = (k, v) => onChange({ ...value, [k]: v })
+  const valid = value.start && value.end && value.start <= value.end
+  return (
+    <div className="custom-range card pad">
+      <div className="custom-range-fields">
+        <label className="field"><span className="field-label">From</span>
+          <input className="input" type="date" value={value.start} max={value.end || undefined}
+            onChange={(e) => set('start', e.target.value)} /></label>
+        <label className="field"><span className="field-label">To</span>
+          <input className="input" type="date" value={value.end} min={value.start || undefined}
+            onChange={(e) => set('end', e.target.value)} /></label>
+      </div>
+      {valid && (
+        <div className="custom-range-step">
+          <button type="button" className="btn small secondary" onClick={() => onChange(shiftRange(value, -1))}>
+            <ChevronLeft size={14} /> Month earlier
+          </button>
+          <span className="muted small"><CalendarRange size={13} /> {fmtDate(value.start, { month: 'short', day: 'numeric', year: 'numeric' })} – {fmtDate(value.end, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+          <button type="button" className="btn small secondary" onClick={() => onChange(shiftRange(value, 1))}>
+            Month later <ChevronRight size={14} />
+          </button>
+        </div>
+      )}
+      {value.start && value.end && value.start > value.end && <p className="form-error">The start date is after the end date.</p>}
+      <p className="muted small">Tip: pick a card under Filters and set these to your statement dates to check the app's total against the statement.</p>
+    </div>
+  )
+}
+
+// What makes up the total: purchases, refunds, bill payments, bill refunds.
+function Breakdown({ b }) {
+  if (!b) return null
+  const parts = [
+    { key: 'spending', label: 'Spending', value: b.spending },
+    { key: 'refunds', label: 'Refunds', value: -b.refunds },
+    { key: 'bills', label: 'Bills', value: b.bills },
+    { key: 'bill_refunds', label: 'Bill refunds', value: -b.bill_refunds },
+  ].filter((p) => p.value)
+  if (parts.length < 2) return null
+  return (
+    <div className="result-breakdown">
+      {parts.map((p) => (
+        <span key={p.key} className={p.value < 0 ? 'credit' : ''}>
+          {p.label} <strong>{p.value < 0 ? `+${money(-p.value)}` : money(p.value)}</strong>
+        </span>
+      ))}
+    </div>
+  )
+}
 
 export default function Activity() {
   const { meta, today, version } = useApp()
@@ -38,7 +101,11 @@ export default function Activity() {
   const [cardId, setCardId] = useState('')
   const [categoryId, setCategoryId] = useState('')
   const [preset, setPreset] = useState('7_days')
-  const [custom, setCustom] = useState({ start: '', end: '' })
+  const [custom, setCustomState] = useState(() => readCustom(today))
+  const setCustom = (next) => {
+    setCustomState(next)
+    try { localStorage.setItem(CUSTOM_KEY, JSON.stringify(next)) } catch { /* private mode */ }
+  }
   const [showFilters, setShowFilters] = useState(false)
   const [page, setPage] = useState(1)
   const [result, setResult] = useState(null)
@@ -105,6 +172,8 @@ export default function Activity() {
         ))}
       </div>
 
+      {preset === 'custom' && <CustomRange value={custom} onChange={setCustom} />}
+
       <Segmented value={kind} onChange={setKind} size="sm" options={[
         { value: 'all', label: 'All' }, { value: 'spending', label: 'Spending' },
         { value: 'refunds', label: 'Refunds' }, { value: 'bills', label: 'Bills' },
@@ -125,14 +194,6 @@ export default function Activity() {
               <option value="custom">Custom…</option>
             </select>
           </label>
-          {preset === 'custom' && (
-            <>
-              <label className="field"><span className="field-label">From</span>
-                <input className="input" type="date" value={custom.start} onChange={(e) => setCustom({ ...custom, start: e.target.value })} /></label>
-              <label className="field"><span className="field-label">To</span>
-                <input className="input" type="date" value={custom.end} onChange={(e) => setCustom({ ...custom, end: e.target.value })} /></label>
-            </>
-          )}
           <label className="field">
             <span className="field-label">Card</span>
             <select className="input" value={cardId} onChange={(e) => setCardId(e.target.value)}>
@@ -160,6 +221,7 @@ export default function Activity() {
           <span>Total <Money value={result.total} signed /></span>
         </div>
       )}
+      {result && <Breakdown b={result.breakdown} />}
 
       {!result ? <div className="center-pad"><Spinner /></div> : result.items.length === 0 ? (
         <Empty icon="🔍" title="Nothing found">Try a different search or clear the filters.</Empty>

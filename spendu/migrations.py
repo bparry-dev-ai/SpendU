@@ -263,10 +263,77 @@ def migration_3_budget_planner(conn):
                 (plan_id, guess_group(category_name), category_name, amount))
 
 
+def _line_key(kind, category_name, bill_id, recurring_id, label, person_user_id=None):
+    if kind == "category":
+        return ("category", (category_name or "").lower())
+    if kind == "bill":
+        return ("bill", bill_id)
+    if kind == "subscription":
+        return ("subscription", recurring_id)
+    if kind == "person":
+        return ("person", person_user_id)
+    return ("custom", (label or "").lower())
+
+
+# ---------------------------------------------------------------------------
+# Migration 4 — one family plan with Bills and Personal sections, bill
+# refunds, and dismissable planner suggestions.
+# Nothing is deleted: the old personal plans stay in the database, but their
+# lines are moved into the family (household) plan, skipping any the family
+# plan already has.
+# ---------------------------------------------------------------------------
+def migration_4_family_plan(conn):
+    # A refund that pays back a bill (e.g. a card payment towards bill charges)
+    # counts against Bills instead of reducing spending.
+    _add_column(conn, "spending", "bill_credit", "INTEGER NOT NULL DEFAULT 0")
+    # Everyday spending: everything except bill refunds.
+    conn.execute("CREATE VIEW IF NOT EXISTS spending_net AS SELECT * FROM spending WHERE bill_credit = 0")
+
+    # Personal spending limits: plan lines of kind 'person'.
+    _add_column(conn, "plan_lines", "person_user_id", "INTEGER REFERENCES users(user_id)")
+
+    # Suggestions someone closed. The key includes the numbers behind the
+    # suggestion, so a changed situation brings up a fresh one.
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS suggestion_dismissals (
+            user_id INTEGER NOT NULL REFERENCES users(user_id),
+            key TEXT NOT NULL,
+            created_at TEXT NOT NULL DEFAULT (datetime('now')),
+            PRIMARY KEY (user_id, key)
+        )""")
+
+    # Merge personal plans into the one family plan.
+    row = conn.execute("SELECT plan_id, income FROM plans WHERE owner_user_id IS NULL").fetchone()
+    if row:
+        family_id, family_income = row
+    else:
+        family_id = conn.execute("INSERT INTO plans (owner_user_id) VALUES (NULL)").lastrowid
+        family_income = None
+    have = {_line_key(*r) for r in conn.execute(
+        "SELECT kind, category_name, bill_id, recurring_id, label FROM plan_lines WHERE plan_id = ?", (family_id,))}
+    personal = conn.execute("SELECT plan_id, income FROM plans WHERE owner_user_id IS NOT NULL ORDER BY plan_id").fetchall()
+    for plan_id, _ in personal:
+        for line_id, *fields in conn.execute(
+                "SELECT line_id, kind, category_name, bill_id, recurring_id, label FROM plan_lines "
+                "WHERE plan_id = ? ORDER BY line_id", (plan_id,)).fetchall():
+            key = _line_key(*fields)
+            if key in have:
+                continue
+            conn.execute("UPDATE plan_lines SET plan_id = ? WHERE line_id = ?", (family_id, line_id))
+            have.add(key)
+    incomes = [inc for _, inc in personal if inc]
+    if family_income is None and incomes:
+        conn.execute("UPDATE plans SET income = ? WHERE plan_id = ?", (round(sum(incomes), 2), family_id))
+
+    # Bills get their own section.
+    conn.execute("UPDATE plan_lines SET group_name = 'bills' WHERE kind = 'bill'")
+
+
 MIGRATIONS = [
     (1, migration_1_v12_baseline),
     (2, migration_2_v2_features),
     (3, migration_3_budget_planner),
+    (4, migration_4_family_plan),
 ]
 LATEST_VERSION = MIGRATIONS[-1][0]
 

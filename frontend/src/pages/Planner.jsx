@@ -1,10 +1,11 @@
-// Budget Planner: monthly income split into Needs, Wants and Savings.
+// Budget Planner: one family plan. Monthly income is split into Bills,
+// Needs, Wants, Personal (a spending limit per person) and Savings.
 // Each budget area is a card: type the planned amount right on it, and see
 // this month's spending and your recent average next to it. Numbers refresh
 // automatically whenever you add a transaction or pay a bill.
 import {
   AlertTriangle, ArrowDownRight, ArrowUpRight, CheckCircle2, Info, Lightbulb, PiggyBank, Plus, Receipt, Repeat,
-  RotateCcw, Sparkles, Trash2, Users, X,
+  RotateCcw, Sparkles, Trash2, User, X,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { del, patch, post, query } from '../api'
@@ -15,13 +16,16 @@ import { money, pct } from '../format'
 import { useApp, useFetch } from '../state'
 
 const GROUPS = [
-  { key: 'needs', label: 'Needs', hint: 'Must-pays: housing, groceries, bills, transport', color: '#6366f1' },
+  { key: 'bills', label: 'Bills', hint: 'Rent, utilities, phone, insurance — added from your Bills page', color: '#64748b' },
+  { key: 'needs', label: 'Needs', hint: 'Everyday must-haves: groceries, gas, childcare, medical', color: '#6366f1' },
   { key: 'wants', label: 'Wants', hint: 'Nice-to-haves: eating out, shopping, fun, subscriptions', color: '#ec4899' },
+  { key: 'personal', label: 'Personal', hint: "Each person's own spending limit — counts their spending in categories that aren't in the plan", color: '#f59e0b' },
   { key: 'savings', label: 'Savings', hint: 'Emergency fund, TSP, extra debt payments', color: '#14b8a6' },
 ]
+const LINE_GROUPS = GROUPS.filter((g) => g.key !== 'personal') // where category/custom lines can go
 const TONE = { over: 'bad', warning: 'warn', ahead: 'warn', ok: 'ok', paid: 'ok', due: 'neutral', unplanned: 'warn' }
 const STATUS_TEXT = { over: 'Over', warning: 'Almost there', ahead: 'Spending fast', ok: 'On track', paid: 'Paid', due: 'Not paid yet' }
-const KIND_LABEL = { category: 'Category', bill: 'Bill', subscription: 'Subscription', custom: 'Planned only' }
+const KIND_LABEL = { category: 'Category', bill: 'Bill', subscription: 'Subscription', custom: 'Planned only', person: 'Personal limit' }
 
 // Shown on Home: category lines acting as monthly limits.
 export function LimitRow({ b }) {
@@ -31,7 +35,7 @@ export function LimitRow({ b }) {
       <div className="budget-top">
         <span className="budget-name">
           {b.label}
-          {b.is_family ? <span className="tag"><Users size={11} /> Household</span> : null}
+          {!b.is_family ? <span className="tag"><User size={11} /> Personal</span> : null}
         </span>
         <span className="budget-nums"><strong>{money(b.spent)}</strong><span className="muted"> / {money(b.amount)}</span></span>
       </div>
@@ -65,6 +69,9 @@ function AmountInput({ value, onSave, label, big, placeholder = '0' }) {
 function LineIcon({ line }) {
   if (line.kind === 'bill') return <span className="cat-icon" style={{ '--c': '#64748b', width: 36, height: 36 }}><Receipt size={16} /></span>
   if (line.kind === 'subscription') return <span className="cat-icon" style={{ '--c': '#8b5cf6', width: 36, height: 36 }}><Repeat size={16} /></span>
+  if (line.kind === 'person') {
+    return <span className="cat-icon" style={{ '--c': '#f59e0b', width: 36, height: 36 }}>{(line.name || '?').slice(0, 1).toUpperCase()}</span>
+  }
   if (line.kind === 'custom') return <span className="cat-icon" style={{ '--c': '#14b8a6', width: 36, height: 36 }}><PiggyBank size={16} /></span>
   return <CategoryIcon icon={line.icon} color={line.color} />
 }
@@ -106,11 +113,11 @@ function LineCard({ line, months, monthProgress, colorFor, onChange }) {
   const showUseAvg = line.average && line.history && line.history !== 'on_track' && line.kind !== 'subscription'
 
   return (
-    <div className={`line-card ${line.status === 'over' ? 'is-over' : ''}`}>
+    <div className={`line-card ${line.status === 'over' ? 'is-over' : ''} ${line.kind === 'person' ? 'person-card' : ''}`}>
       <div className="line-head">
         <LineIcon line={{ ...line, color }} />
         <div className="tx-main">
-          <span className="tx-title">{line.name}</span>
+          <span className="tx-title">{line.name}{line.is_me ? ' (you)' : ''}</span>
           <span className="tx-detail">{KIND_LABEL[line.kind]}{line.follows_source ? ' · uses usual amount' : ''}</span>
         </div>
         <RemoveButton onConfirm={remove} name={line.name} />
@@ -119,12 +126,14 @@ function LineCard({ line, months, monthProgress, colorFor, onChange }) {
       <div className="line-inputs">
         <AmountInput label="Planned / month" value={line.planned}
           onSave={(amount) => save({ amount }, `${line.name} set to ${money(amount)}`)} />
-        <label className="group-select">
-          <span className="amount-block-label">Group</span>
-          <select className="input slim" value={line.group_name} onChange={(e) => save({ group: e.target.value })}>
-            {GROUPS.map((g) => <option key={g.key} value={g.key}>{g.label}</option>)}
-          </select>
-        </label>
+        {line.kind !== 'person' && (
+          <label className="group-select">
+            <span className="amount-block-label">Group</span>
+            <select className="input slim" value={line.group_name} onChange={(e) => save({ group: e.target.value })}>
+              {LINE_GROUPS.map((g) => <option key={g.key} value={g.key}>{g.label}</option>)}
+            </select>
+          </label>
+        )}
       </div>
       {!line.follows_source && line.source_amount !== null && line.source_amount !== undefined && line.source_amount !== line.planned && (
         <button className="link small left" onClick={() => save({ amount: null }, 'Using the usual amount again')}>
@@ -135,11 +144,11 @@ function LineCard({ line, months, monthProgress, colorFor, onChange }) {
       {line.tracked ? (
         <div className="line-info">
           <div className="line-month">
-            <span><strong>{money(line.spent)}</strong><span className="muted"> spent this month</span></span>
+            <span><strong>{money(line.spent)}</strong><span className="muted"> {line.kind === 'person' ? 'personal spending this month' : 'spent this month'}</span></span>
             {line.status && <Badge tone={TONE[line.status]}>{STATUS_TEXT[line.status]}</Badge>}
           </div>
           <Progress value={line.pct} tone={TONE[line.status] === 'neutral' ? undefined : TONE[line.status]}
-            marker={line.kind === 'category' ? monthProgress : undefined} />
+            marker={line.kind === 'category' || line.kind === 'person' ? monthProgress : undefined} />
           <div className="line-foot">
             <span className="muted small">
               {line.remaining >= 0 ? `${money(line.remaining)} left` : `${money(-line.remaining)} over`}
@@ -176,7 +185,56 @@ function RemoveButton({ onConfirm, name }) {
   )
 }
 
-function AddLineSheet({ scope, group, report, onClose, onAdded }) {
+function AddPersonSheet({ report, onClose, onAdded }) {
+  const { notify } = useApp()
+  const [person, setPerson] = useState(report.person_choices[0]?.user_id || '')
+  const [amount, setAmount] = useState('')
+  const [error, setError] = useState(null)
+  const save = async (e) => {
+    e.preventDefault()
+    setError(null)
+    try {
+      await post('/planner/lines', { kind: 'person', person_user_id: person, amount: amount || 0 })
+      notify(`Personal limit added for ${report.person_choices.find((p) => p.user_id === Number(person))?.username}`)
+      onAdded()
+      onClose()
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+  return (
+    <Sheet title="Add a personal limit" onClose={onClose}>
+      {report.person_choices.length === 0 ? (
+        <p className="muted">Everyone in the family already has a personal limit.</p>
+      ) : (
+        <form className="stack" onSubmit={save}>
+          <p className="muted small">
+            Give someone their own monthly spending money out of the family budget. It counts their spending in
+            categories that aren't already in Bills, Needs or Wants, so nothing is counted twice.
+          </p>
+          <Field label="Who">
+            <Segmented value={Number(person)} onChange={setPerson}
+              options={report.person_choices.map((p) => ({ value: p.user_id, label: p.username }))} />
+          </Field>
+          <Field label="Limit per month">
+            <div className="amount-input small">
+              <span>$</span>
+              <input type="number" inputMode="decimal" step="0.01" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" />
+            </div>
+          </Field>
+          {error && <p className="form-error">{error}</p>}
+          <div className="row">
+            <span className="spacer" />
+            <button type="button" className="btn ghost" onClick={onClose}>Cancel</button>
+            <button className="btn primary">Add</button>
+          </div>
+        </form>
+      )}
+    </Sheet>
+  )
+}
+
+function AddLineSheet({ group, report, onClose, onAdded }) {
   const { notify } = useApp()
   const [kind, setKind] = useState(report.category_choices.length ? 'category' : 'custom')
   const [targetGroup, setTargetGroup] = useState(group)
@@ -195,7 +253,7 @@ function AddLineSheet({ scope, group, report, onClose, onAdded }) {
     e.preventDefault()
     setError(null)
     try {
-      await post('/planner/lines', { scope, kind, group: targetGroup, category_name: category, label, amount: amount || 0 })
+      await post('/planner/lines', { kind, group: targetGroup, category_name: category, label, amount: amount || 0 })
       notify(`${kind === 'category' ? category : label} added to ${GROUPS.find((g) => g.key === targetGroup).label}`)
       onAdded()
       onClose()
@@ -229,7 +287,7 @@ function AddLineSheet({ scope, group, report, onClose, onAdded }) {
           </Field>
         )}
         <Field label="Group">
-          <Segmented value={targetGroup} onChange={setTargetGroup} options={GROUPS.map((g) => ({ value: g.key, label: g.label }))} />
+          <Segmented value={targetGroup} onChange={setTargetGroup} options={LINE_GROUPS.map((g) => ({ value: g.key, label: g.label }))} />
         </Field>
         <Field label="Planned per month">
           <div className="amount-input small">
@@ -260,8 +318,8 @@ function SplitBar({ report }) {
           <div key={p.key} style={{ width: `${(p.value / total) * 100}%`, background: p.color }} title={`${p.label}: ${money(p.value)}`} />
         ))}
         {left > 0 && <div className="split-left" style={{ width: `${(left / total) * 100}%` }} title={`Left to assign: ${money(left)}`} />}
-        {income > 0 && <span className="split-guide" style={{ left: '50%' }} title="50% Needs guide" />}
-        {income > 0 && <span className="split-guide" style={{ left: '80%' }} title="+30% Wants guide" />}
+        {income > 0 && <span className="split-guide" style={{ left: '50%' }} title="50% guide for Bills + Needs" />}
+        {income > 0 && <span className="split-guide" style={{ left: '80%' }} title="+30% guide for Wants + Personal" />}
       </div>
       <div className="split-legend">
         {parts.map((p) => {
@@ -271,65 +329,95 @@ function SplitBar({ report }) {
               <span className="dot" style={{ background: p.color, width: 10, height: 10 }} />
               <span>{p.label}</span>
               <strong>{money(g.planned)}</strong>
-              {g.share !== null && <span className={`muted small ${p.key !== 'savings' && g.share > g.guide + 0.1 ? 'warn-text' : ''}`}>
-                {pct(g.share)} · guide {pct(g.guide)}</span>}
+              {g.share !== null && <span className="muted small">{pct(g.share)}</span>}
             </div>
           )
         })}
       </div>
+      {income > 0 && <p className="muted small plan-guide">50/30/20 guide: Bills + Needs 50% · Wants + Personal 30% · Savings 20%</p>}
     </div>
   )
 }
 
 const TIP_ICON = { bad: AlertTriangle, warn: AlertTriangle, ok: CheckCircle2, info: Info }
 
-function Suggestions({ report, scope, onChange }) {
+function Suggestions({ report, onChange }) {
   const { notify } = useApp()
-  if (!report.suggestions.length) return null
+  const [closing, setClosing] = useState(() => new Set()) // hide right away while the server catches up
+  const tips = report.suggestions.filter((t) => !closing.has(t.key))
   const act = async (a) => {
     try {
       if (a.kind === 'set_amount') await patch(`/planner/lines/${a.line_id}`, { amount: a.amount })
       if (a.kind === 'add_category') {
-        await post('/planner/lines', { scope, kind: 'category', category_name: a.category_name, amount: a.amount, group: a.group })
+        await post('/planner/lines', { kind: 'category', category_name: a.category_name, amount: a.amount, group: a.group })
       }
-      if (a.kind === 'add_savings') await post('/planner/lines', { scope, kind: 'custom', label: 'Savings', group: 'savings', amount: a.amount })
+      if (a.kind === 'add_savings') await post('/planner/lines', { kind: 'custom', label: 'Savings', group: 'savings', amount: a.amount })
       notify('Plan updated')
       onChange()
     } catch (e) {
       notify(e.message, 'error')
     }
   }
+  const dismiss = async (t) => {
+    setClosing((c) => new Set(c).add(t.key))
+    try {
+      await post('/planner/suggestions/dismiss', { key: t.key })
+      onChange()
+    } catch (e) {
+      setClosing((c) => { const n = new Set(c); n.delete(t.key); return n })
+      notify(e.message, 'error')
+    }
+  }
+  const restoreAll = async () => {
+    try {
+      await del('/planner/suggestions/dismissed')
+      setClosing(new Set())
+      onChange()
+    } catch (e) {
+      notify(e.message, 'error')
+    }
+  }
   const actionLabel = (a) => (a.kind === 'set_amount' ? `Set to ${money(a.amount)}` : a.kind === 'add_category' ? `Add (${money(a.amount)})` : 'Add to Savings')
+  const restoreLink = report.dismissed_count > 0 && (
+    <button type="button" className="link small" onClick={restoreAll}>
+      Show {report.dismissed_count} closed suggestion{report.dismissed_count === 1 ? '' : 's'}
+    </button>
+  )
+  if (!tips.length) return restoreLink ? <div className="tips-foot">{restoreLink}</div> : null
   return (
     <Card title={<span className="row"><Lightbulb size={16} /> Suggestions</span>}>
       <div className="tips">
-        {report.suggestions.map((t, i) => {
+        {tips.map((t) => {
           const Icon = TIP_ICON[t.tone] || Info
           return (
-            <div key={i} className={`tip ${t.tone}`}>
+            <div key={t.key} className={`tip ${t.tone}`}>
               <Icon size={16} className="tip-icon" />
               <span className="tip-text">{t.message}</span>
               {t.action && <button className="btn small secondary" onClick={() => act(t.action)}>{actionLabel(t.action)}</button>}
+              <button type="button" className="icon-btn tip-close" aria-label="Close suggestion" title="Close suggestion"
+                onClick={() => dismiss(t)}>
+                <X size={15} />
+              </button>
             </div>
           )
         })}
       </div>
+      {restoreLink && <div className="tips-foot">{restoreLink}</div>}
     </Card>
   )
 }
 
 export default function Planner() {
-  const { today, family, meta, notify } = useApp()
-  const [scope, setScope] = useState('personal')
+  const { today, meta, notify } = useApp()
   const [month, setMonth] = useState(today.slice(0, 7))
   const [months, setMonths] = useState(3)
   const [adding, setAdding] = useState(null) // group key
-  const { data, error, reload } = useFetch('/planner' + query({ scope, month, months }))
+  const { data, error, reload } = useFetch('/planner' + query({ month, months }))
 
   const colorFor = (name) => meta.categories.find((c) => c.name.toLowerCase() === (name || '').toLowerCase())?.color || '#94a3b8'
   const updatePlan = async (changes, message) => {
     try {
-      await patch('/planner', { scope, ...changes })
+      await patch('/planner', changes)
       if (message) notify(message)
       reload()
     } catch (e) {
@@ -337,7 +425,7 @@ export default function Planner() {
     }
   }
   const startFromSpending = async () => {
-    const res = await post('/planner/start', { scope })
+    const res = await post('/planner/start', {})
     notify(res.added ? `Added ${res.added} categories from your spending` : 'No recent spending to start from')
     reload()
   }
@@ -347,10 +435,7 @@ export default function Planner() {
   return (
     <div className="page">
       <PageHeader title="Budget Planner"
-        subtitle={scope === 'household' ? 'Shared plan — compared against everyone\'s spending. Anyone in the family can edit it.' : 'Give every dollar of your income a job.'}
-        actions={family.length > 1 && (
-          <Segmented value={scope} onChange={setScope} size="sm" options={[{ value: 'personal', label: 'My plan' }, { value: 'household', label: 'Household' }]} />
-        )} />
+        subtitle="One family plan: give every dollar of income a job — bills first, then needs, wants and each person's own spending." />
 
       <div className="row between wrap">
         <MonthSwitcher month={month} onChange={setMonth} />
@@ -370,7 +455,7 @@ export default function Planner() {
         <>
           <Card className="plan-summary">
             <div className="plan-figures">
-              <AmountInput big label="Monthly income (take-home)" value={data.plan.income}
+              <AmountInput big label="Family monthly income (take-home)" value={data.plan.income}
                 onSave={(income) => updatePlan({ income }, 'Income saved')} placeholder="Enter income" />
               <div className="plan-figure">
                 <span className="amount-block-label">Planned</span>
@@ -385,7 +470,7 @@ export default function Planner() {
             <div className="plan-cap">
               <span className="muted small">
                 {isCurrentMonth ? 'Spent so far this month' : 'Spent that month'}: <strong>{money(data.summary.spent_this_month)}</strong>
-                {data.plan.overall_cap ? <> of your {money(data.plan.overall_cap)} overall limit</> : null}
+                {data.plan.overall_cap ? <> of the family's {money(data.plan.overall_cap)} overall limit</> : null}
               </span>
               <AmountInput label="Overall spending limit (optional)" value={data.plan.overall_cap}
                 onSave={(cap) => updatePlan({ overall_cap: cap || null }, cap ? 'Overall limit saved' : 'Overall limit removed')} placeholder="None" />
@@ -403,7 +488,7 @@ export default function Planner() {
               Start from your spending to get a card for each category you've used recently, set to your average. Bills and subscriptions are added automatically.
             </Empty>
           ) : (
-            <Suggestions report={data} scope={scope} onChange={reload} />
+            <Suggestions report={data} onChange={reload} />
           )}
 
           {data.lines.length > 0 && GROUPS.map((g) => {
@@ -418,7 +503,7 @@ export default function Planner() {
                   </div>
                   <div className="right">
                     <strong>{money(info.planned)}</strong>
-                    <div className="muted small">{money(info.spent)} spent{info.share !== null ? ` · ${pct(info.share)} of income` : ''}</div>
+                    <div className="muted small">{money(info.spent)} {g.key === 'bills' ? 'paid' : 'spent'}{info.share !== null ? ` · ${pct(info.share)} of income` : ''}</div>
                   </div>
                 </header>
                 <div className="line-grid">
@@ -428,7 +513,7 @@ export default function Planner() {
                   ))}
                   <button className="line-card add-card" onClick={() => setAdding(g.key)}>
                     <Plus size={22} />
-                    <span>Add to {g.label}</span>
+                    <span>{g.key === 'personal' ? 'Add a person' : `Add to ${g.label}`}</span>
                   </button>
                 </div>
               </section>
@@ -449,7 +534,8 @@ export default function Planner() {
         </>
       )}
 
-      {adding && data && <AddLineSheet scope={scope} group={adding} report={data} onClose={() => setAdding(null)} onAdded={reload} />}
+      {adding === 'personal' && data && <AddPersonSheet report={data} onClose={() => setAdding(null)} onAdded={reload} />}
+      {adding && adding !== 'personal' && data && <AddLineSheet group={adding} report={data} onClose={() => setAdding(null)} onAdded={reload} />}
     </div>
   )
 }

@@ -54,7 +54,8 @@ function Breakdown() {
           <div className="stats-row card pad">
             <Stat label={includeBills ? 'Spending + bills' : 'Spending'} value={money(data.total)} sub={`${fmtDate(data.start)} – ${fmtDate(data.end)}`} />
             <Stat label="Refunds" value={money(data.refunds_total)} tone="credit" />
-            {!includeBills && <Stat label="Bills (separate)" value={money(data.bills_total)} />}
+            {!includeBills && <Stat label="Bills (separate)" value={money(data.bills_total)}
+              sub={data.bill_refunds_total ? `after ${money(data.bill_refunds_total)} bill refunds` : undefined} />}
           </div>
           {data.by_category.length === 0 ? <Empty icon="📊" title="No spending in this period" /> : (
             <div className="grid-2 cards">

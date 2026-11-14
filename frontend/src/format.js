@@ -29,6 +29,20 @@ export function shiftMonth(ym, delta) {
   return isoDate(d).slice(0, 7)
 }
 
+// Move a date by whole months, keeping the day (clamped to the month's last day).
+export function shiftDate(s, months) {
+  const [y, m, d] = s.split('-').map(Number)
+  const last = new Date(y, m - 1 + months + 1, 0).getDate()
+  return isoDate(new Date(y, m - 1 + months, Math.min(d, last)))
+}
+
+// Move a date range (e.g. a card statement period) by whole months.
+// The end moves as "the day before the next start", so 1–31 Oct becomes
+// 1–30 Nov and then 1–31 Dec, and 15 Oct–14 Nov becomes 15 Nov–14 Dec.
+export function shiftRange({ start, end }, months) {
+  return { start: shiftDate(start, months), end: addDays(shiftDate(addDays(end, 1), months), -1) }
+}
+
 export function addDays(s, n) {
   const d = toDate(s)
   d.setDate(d.getDate() + n)

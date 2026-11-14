@@ -34,8 +34,12 @@ function Hero({ data }) {
   const s = data.spending
   const month = monthName(data.month)
   const diff = s.month - s.last_month_to_date
-  const budget = data.budget_total
-  const pace = budget ? budgetPace(budget, s.month, today) : null
+  // The budget is your personal limit from the Planner if you have one,
+  // otherwise the family's everyday spending plan.
+  const budget = data.budget?.amount
+  const budgetSpent = data.budget?.spent ?? s.month
+  const whose = data.budget?.kind === 'family' ? "the family's" : 'your'
+  const pace = budget ? budgetPace(budget, budgetSpent, today) : null
   const lastWeek = pace && pace.daysLeft <= 7
 
   return (
@@ -55,9 +59,9 @@ function Hero({ data }) {
             </div>
             <p className="hero-note">
               {pace.over ? (
-                <>You've spent <strong>{money(-pace.remaining)}</strong> more than your {money(budget)} budget for {month}.</>
+                <>You've spent <strong>{money(-pace.remaining)}</strong> more than {whose} {money(budget)} budget for {month}.</>
               ) : pace.onPace ? (
-                <><strong>{money(pace.remaining)}</strong> of your {money(budget)} {month} budget is left, with {pace.daysLeft} day{pace.daysLeft === 1 ? '' : 's'} to go.</>
+                <><strong>{money(pace.remaining)}</strong> of {whose} {money(budget)} {month} budget is left, with {pace.daysLeft} day{pace.daysLeft === 1 ? '' : 's'} to go.</>
               ) : (
                 <>Spending is running ahead of the month. About <strong>{money(pace.daily)}</strong> a day keeps you inside your budget.</>
               )}
@@ -78,7 +82,7 @@ function Hero({ data }) {
         {pace && (
           <>
             <div className="hero-row">
-              <span>Spent in {month}: <strong className="num">{money(s.month)}</strong></span>
+              <span>{data.budget.kind === 'family' ? 'Family spent' : data.budget.kind === 'personal' ? 'Personal spending' : `Spent in ${month}`}: <strong className="num">{money(budgetSpent)}</strong></span>
               <span>Budget: <strong className="num">{money(budget)}</strong></span>
             </div>
             <div className={`pace-track ${pace.over ? 'over' : ''}`}><div style={{ width: `${pace.used * 100}%` }} /></div>

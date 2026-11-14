@@ -20,7 +20,7 @@ def _sum(conn, sql, params):
 
 def daily_cumulative(conn, start, days, user_id):
     rows = conn.execute(
-        """SELECT date, SUM(amount) AS total FROM spending
+        """SELECT date, SUM(amount) AS total FROM spending_net
            WHERE user_id = ? AND date BETWEEN ? AND date(?, ?) GROUP BY date""",
         (user_id, start, start, f"+{days - 1} days"),
     ).fetchall()
@@ -31,17 +31,6 @@ def daily_cumulative(conn, start, days, user_id):
         running += by_day.get(str(first + timedelta(days=i)), 0)
         out.append(money(running))
     return out
-
-
-def monthly_budget(limits):
-    """Your own spending budget for the month, behind Home's "safe to spend"
-    figure: the overall limit if you set one in the Planner, otherwise your
-    planned categories added up. None when you haven't planned anything."""
-    mine = [l for l in limits if not l["is_family"]]
-    cap = next((l for l in mine if str(l["line_id"]).startswith("cap-")), None)
-    if cap:
-        return cap["amount"]
-    return money(sum(l["amount"] for l in mine)) or None
 
 
 @bp.get("/dashboard")
@@ -57,16 +46,19 @@ def dashboard():
     monday = now - timedelta(days=now.weekday())
     sunday = monday + timedelta(days=6)
 
-    spend_sql = "SELECT COALESCE(SUM(amount), 0) FROM spending WHERE date BETWEEN ? AND ?"
+    spend_sql = "SELECT COALESCE(SUM(amount), 0) FROM spending_net WHERE date BETWEEN ? AND ?"
     mine = spend_sql + " AND user_id = ?"
     month_spent = _sum(conn, mine, (start, end, uid()))
     last_month_to_date = _sum(conn, mine, (prev_start, prev_cutoff, uid()))
     last_month_total = _sum(conn, mine, (prev_start, prev_end, uid()))
-    bills_paid = _sum(conn, "SELECT COALESCE(SUM(amount), 0) FROM bills WHERE date BETWEEN ? AND ? AND user_id = ?",
-                      (start, end, uid()))
+    # Bill payments, less any refunds marked as bill refunds.
+    bills_paid = _sum(conn, """SELECT COALESCE(SUM(amount), 0) FROM (
+                                   SELECT amount, date, user_id FROM bills
+                                   UNION ALL SELECT amount, date, user_id FROM spending WHERE bill_credit = 1)
+                               WHERE date BETWEEN ? AND ? AND user_id = ?""", (start, end, uid()))
 
     top_categories = to_dicts(conn.execute(
-        """SELECT c.name, c.color, c.icon, SUM(s.amount) AS total FROM spending s
+        """SELECT c.name, c.color, c.icon, SUM(s.amount) AS total FROM spending_net s
            JOIN category_info c ON c.category_id = s.category_id
            WHERE s.user_id = ? AND s.date BETWEEN ? AND ?
            GROUP BY c.category_id HAVING total > 0 ORDER BY total DESC LIMIT 5""",
@@ -75,7 +67,7 @@ def dashboard():
     checklist = build_checklist(conn, now.year, now.month)
     open_bills = [i for i in checklist["items"] if i["status"] != "paid"][:4]
 
-    limits = limits_for_dashboard(conn)
+    limits, budget = limits_for_dashboard(conn)
 
     recent = to_dicts(conn.execute(f"SELECT * FROM ({UNIFIED_SQL}) ORDER BY date DESC, id DESC LIMIT 6",
                                    {"uid": uid()}).fetchall())
@@ -104,6 +96,6 @@ def dashboard():
         "bills": {"summary": checklist["summary"], "open": open_bills},
         "pending_recurring": pending_items(conn),
         "budgets": limits[:4],
-        "budget_total": monthly_budget(limits),
+        "budget": budget,
         "recent": recent,
     }

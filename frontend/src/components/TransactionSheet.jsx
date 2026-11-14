@@ -118,6 +118,7 @@ export default function TransactionSheet({ entry, onClose }) {
     card_id: entry?.card_id || (cards.some((c) => c.card_id === readLastCard()) ? readLastCard() : cards[0]?.card_id) || null,
     date: entry?.date || today,
     notes: entry?.notes || '',
+    bill_credit: Boolean(entry?.bill_credit),
   }))
   const [categoryTouched, setCategoryTouched] = useState(editing)
   const [showNotes, setShowNotes] = useState(Boolean(entry?.notes))
@@ -167,7 +168,7 @@ export default function TransactionSheet({ entry, onClose }) {
       else await post('/spending', payload)
       try { localStorage.setItem(LAST_CARD_KEY, String(form.card_id)) } catch { /* private mode */ }
       changed()
-      notify(editing ? 'Saved changes' : mode === 'refund' ? 'Refund added' : 'Spending added')
+      notify(editing ? 'Saved changes' : mode === 'refund' ? (form.bill_credit ? 'Bill refund added' : 'Refund added') : 'Spending added')
       onClose()
     } catch (err) {
       setError(err.message)
@@ -232,6 +233,16 @@ export default function TransactionSheet({ entry, onClose }) {
           <input inputMode="decimal" type="number" step="0.01" min="0" placeholder="0.00" autoFocus={!editing}
             value={form.amount} onChange={(e) => set('amount', e.target.value)} aria-label="Amount" />
         </div>
+
+        {mode === 'refund' && (
+          <label className="check bill-credit">
+            <input type="checkbox" checked={form.bill_credit} onChange={(e) => set('bill_credit', e.target.checked)} />
+            <span>
+              <strong>This refund is for bills</strong>
+              <span className="muted small">Counts against Bills instead of your spending — e.g. a card payment or credit for bills you paid on that card.</span>
+            </span>
+          </label>
+        )}
 
         <Field label="Merchant">
           <MerchantInput value={form.merchant} onChange={(v) => set('merchant', v)} onPick={pickMerchant} onExact={applyMerchantCategory} />

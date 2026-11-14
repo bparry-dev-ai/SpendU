@@ -24,6 +24,7 @@ export function TransactionRow({ tx }) {
         <span className="tx-title">
           {title}
           {tx.recurring_id && <Repeat size={12} className="muted" aria-label="Subscription" />}
+          {tx.bill_credit ? <span className="tag"><Receipt size={11} /> Bill refund</span> : null}
         </span>
         <span className="tx-detail">{detail}{tx.notes ? ` · ${tx.notes}` : ''}</span>
       </span>

@@ -71,7 +71,7 @@ CREATE TABLE plan_lines (
             hidden INTEGER NOT NULL DEFAULT 0,  -- removed auto lines stay hidden so they don't come back
             sort_order INTEGER NOT NULL DEFAULT 0,
             created_at TEXT NOT NULL DEFAULT (datetime('now'))
-        );
+        , person_user_id INTEGER REFERENCES users(user_id));
 
 CREATE TABLE plans (
             plan_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -101,9 +101,16 @@ CREATE TABLE spending (
             card_id INTEGER NOT NULL,
             user_id INTEGER REFERENCES users(user_id),
             amount REAL NOT NULL,
-            date TEXT NOT NULL DEFAULT (date('now')), merchant TEXT, notes TEXT, recurring_id INTEGER, import_hash TEXT, created_at TEXT,
+            date TEXT NOT NULL DEFAULT (date('now')), merchant TEXT, notes TEXT, recurring_id INTEGER, import_hash TEXT, created_at TEXT, bill_credit INTEGER NOT NULL DEFAULT 0,
             FOREIGN KEY (category_id) REFERENCES category_info(category_id),
             FOREIGN KEY (card_id) REFERENCES card_info(card_id)
+        );
+
+CREATE TABLE suggestion_dismissals (
+            user_id INTEGER NOT NULL REFERENCES users(user_id),
+            key TEXT NOT NULL,
+            created_at TEXT NOT NULL DEFAULT (datetime('now')),
+            PRIMARY KEY (user_id, key)
         );
 
 CREATE TABLE users (
@@ -111,6 +118,8 @@ CREATE TABLE users (
             username TEXT UNIQUE NOT NULL,
             password_hash TEXT NOT NULL
         , timezone TEXT);
+
+CREATE VIEW spending_net AS SELECT * FROM spending WHERE bill_credit = 0;
 
 CREATE INDEX idx_bills_month ON bills(bill_id, bill_month);
 

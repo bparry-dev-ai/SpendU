@@ -1,5 +1,39 @@
 # SpendU — feature and design notes
 
+## Family plan, bill refunds, statement dates (2026-11-13)
+
+- **Migration 4** (`migration_4_family_plan`):
+  - **One family plan.** The household plan (`owner_user_id` NULL) is now the only
+    plan. Lines from personal plans are moved into it unless it already has the same
+    line (same category name, bill, subscription or custom label). If the family plan
+    had no income, it gets the personal plans' incomes added together. The old
+    personal `plans` rows stay in the database, unused.
+  - **Bills section.** New group `bills`; existing bill lines move into it. Groups are
+    now bills / needs / wants / personal / savings. The 50/30/20 guide is applied as
+    Bills + Needs 50%, Wants + Personal 30%, Savings 20%.
+  - **Personal limits.** `plan_lines.person_user_id` and kind `person` (group
+    `personal`). Actual = that person's spending in categories that aren't category
+    lines in the plan, minus subscriptions with their own line, so nothing is counted
+    twice. People with a personal limit are left out of "not in your plan" suggestions.
+    Subscriptions from everyone are now added to the family plan automatically.
+  - **Closable suggestions.** Table `suggestion_dismissals (user_id, key)`. Each
+    suggestion has a `key` that includes its numbers (e.g. `over:12:450:400`), so a
+    closed one comes back as a new suggestion when the numbers change. "Show N closed
+    suggestions" clears them.
+  - **Bill refunds.** `spending.bill_credit` (0/1). A refund marked "This refund is
+    for bills" counts against Bills instead of spending. View `spending_net` = spending
+    without bill refunds. Home, Insights and the Planner read spending from it; their
+    bill totals add bill refunds (negative) to bill payments. Activity shows bill
+    refunds under the Bills filter and tags them "Bill refund".
+- **Home "Safe to spend"** uses your personal limit if you have one, otherwise the
+  family's everyday plan (categories + subscriptions + personal limits, or the overall
+  cap) against family spending. `/api/dashboard` returns this as `budget`
+  (`{amount, spent, kind}`), replacing `budget_total`.
+- **Activity custom dates.** A "Custom dates" chip shows From/To fields inline, plus
+  "Month earlier / Month later" to step a statement period (15 Oct–14 Nov →
+  15 Nov–14 Dec). The last range is remembered in the browser. `/api/transactions`
+  now returns a `breakdown` (spending, refunds, bills, bill refunds) under the total.
+
 ## Budget Planner (2026-11-08) — replaces the Budgets page
 
 - **Page:** `/planner` (`frontend/src/pages/Planner.jsx`). **API:** `/api/planner`

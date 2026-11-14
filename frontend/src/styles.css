@@ -457,6 +457,16 @@ input[type=number] { -moz-appearance: textfield; }
 .tx-detail { font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tx-amount { font-size: 15px; }
 .result-summary { display: flex; justify-content: space-between; font-size: 14px; color: var(--muted); padding: 0 4px; }
+.result-breakdown { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--muted); padding: 0 4px; margin-top: -6px; }
+.result-breakdown strong { color: var(--text); font-weight: 600; }
+.result-breakdown .credit strong { color: var(--ok); }
+.custom-range { display: flex; flex-direction: column; gap: 10px; }
+.custom-range-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.custom-range-step { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.custom-range-step .muted { display: inline-flex; align-items: center; gap: 5px; }
+.check.bill-credit { align-items: flex-start; padding: 10px 12px; border-radius: var(--radius-sm); background: var(--surface-2); }
+.check.bill-credit input { margin-top: 2px; flex-shrink: 0; }
+.check.bill-credit > span { display: flex; flex-direction: column; gap: 2px; }
 .menu-icon { width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
 
 .toolbar { display: flex; gap: 10px; align-items: center; }
@@ -683,6 +693,11 @@ input[type=number] { -moz-appearance: textfield; }
 .tip.bad .tip-icon { color: var(--bad); }
 .tip.ok .tip-icon { color: var(--ok); }
 .tip-text { flex: 1; }
+.tip-close { flex-shrink: 0; width: 28px; height: 28px; margin: -4px -6px -4px 0; color: var(--muted); }
+.tip-close:hover { color: var(--text); background: var(--surface); }
+.tips-foot { display: flex; justify-content: flex-end; margin-top: 8px; }
+.plan-guide { margin-top: 2px; }
+.person-card .cat-icon { font-weight: 700; font-size: 14px; }
 
 .plan-group { display: flex; flex-direction: column; gap: 12px; }
 .plan-group-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; padding: 4px 2px 0; }
@@ -718,5 +733,9 @@ input[type=number] { -moz-appearance: textfield; }
   .plan-num { font-size: 22px; }
   .line-grid { grid-template-columns: 1fr; }
   .tip { flex-wrap: wrap; }
-  .tip .btn { margin-left: 26px; }
+  .tip-text { flex: 1 1 calc(100% - 70px); }
+  .tip-close { order: 2; }
+  .tip .btn { order: 3; margin-left: 26px; }
+  .custom-range-step { justify-content: center; }
+  .custom-range-step .muted { order: -1; width: 100%; justify-content: center; }
 }
